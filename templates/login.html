@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Page de connexion {% endblock %}</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/jquery-ui.css')}}"
+    />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+
+    <script
+      type="text/javascript"
+      src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <!-- Pour les messages Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <ul>
+      {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+
+    <h1>Connexion</h1>
+
+    <form action="/login" method="post" id="formulaire">
+      <label for="username">Nom d'utilisateur:</label>
+      <input
+        type="text"
+        required
+        minlength="3"
+        id="username"
+        name="username"
+      /><br /><br />
+      <label for="password">Mot de passe:</label>
+      <input
+        type="password"
+        required
+        minlength="2"
+        id="password"
+        name="password"
+      /><br /><br />
+      <button>Connexion</button>
+    </form>
+  </body>
+</html>
