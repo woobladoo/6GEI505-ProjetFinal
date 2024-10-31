@@ -1,0 +1,34 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f2f2f2; /* Couleur de fond */
+  }
+
+.login-container {
+    text-align: center;
+    background-color: white; /* Couleur de fond de l'encadrement */
+    padding: 40px;
+    border-radius: 20px; /* Bords arrondis */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre */
+    max-width: 500px; /* Largeur maximale */
+    min-height: 600px;
+    width: 80%; /* Largeur */}
+
+.usernamefield{
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.connexion{
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+img{
+    max-width: 70px;
+    max-height: 70px;
+        }
