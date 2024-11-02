@@ -40,6 +40,10 @@ def logout():
 def profil():
     return render_template('profil.html')
 
+@app.route('/employes', methods=['GET', 'POST'])
+def employes():
+    return render_template('employes.html')
+
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(debug=True)
