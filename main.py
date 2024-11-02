@@ -36,6 +36,10 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
+@app.route('/profil', methods=['GET', 'POST'])
+def profil():
+    return render_template('profil.html')
+
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(debug=True)

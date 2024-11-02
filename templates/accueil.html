@@ -24,6 +24,13 @@
 
     <p>Bonjour! Bienvenue sur notre site.</p>
     <form
+      action="{{ url_for('profil') }}"
+      method="post"
+      style="display: inline"
+    >
+      <button type="submit">Profil</button>
+    </form>
+    <form
       action="{{ url_for('logout') }}"
       method="post"
       style="display: inline"
