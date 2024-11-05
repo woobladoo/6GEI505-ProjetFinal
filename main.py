@@ -16,6 +16,10 @@ def home():           ##Fonction pour gérer la réaction de la page d'accueil, 
 def accueil():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
   return render_template('accueil.html')
 
+@app.route('/profil', methods=['GET', 'POST'])
+def profil():
+  return render_template('accueil.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
