@@ -16,8 +16,10 @@
     <div class="header">
       <h4>PROJET 1: Développement Gestionnaire de Projet et de Temps</h4>
       <div class="menu">
-        <a href="#" class="highlight-link">Projets</a>
-        <a href="#" class="highlight-link">Profil</a>
+        <a href="{{ url_for('listeProjets') }}" class="highlight-link"
+          >Projets</a
+        >
+        <a href="{{ url_for('profil') }}" class="highlight-link">Profil</a>
         <a href="#" class="user-icon">
           <img
             src="../static/images/icon_utiliateur.jpg"

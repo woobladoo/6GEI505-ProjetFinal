@@ -12,13 +12,9 @@ users = {"admin": "password123"}
 def home():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
   return redirect(url_for('login'))
 
-@app.route('/accueil', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
-def accueil():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
-  return render_template('accueil.html')
-
-# @app.route('/profil', methods=['GET', 'POST'])
-# def profil():
-#   return render_template('accueil.html')
+@app.route('/listeProjets', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
+def listeProjets():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
+  return render_template('listeProjets.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -29,7 +25,7 @@ def login():
         if username in users and users[username] == password:
             session['username'] = username  # Start a session
             flash('Login successful!', 'success')
-            return redirect(url_for('accueil'))
+            return redirect(url_for('listeProjets'))
         else:
             flash('Invalid credentials. Please try again.', 'error')
     return render_template('login.html')
@@ -50,11 +46,11 @@ def employes():
 
 @app.route('/projet', methods=['GET', 'POST'])
 def projet():
-    return render_template('Projets.html')
+    return render_template('projet.html')
 
 @app.route('/tache', methods=['GET', 'POST'])
 def tache():
-    return render_template('Taches.html')
+    return render_template('taches.html')
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask

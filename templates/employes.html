@@ -1,126 +1,126 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employés</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-        }
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #5f5fc4;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .employee-list {
-            margin-top: 20px;
-        }
-        .add-button {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #bbb;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 24px;
-            color: #5f5fc4;
-            margin-bottom: 20px;
-        }
-        .employee-card {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        .employee-avatar {
-            width: 50px;
-            height: 50px;
-            background-color: #bbb;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-        }
-        .employee-details {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .employee-info {
-            display: flex;
-            flex-direction: column;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+      }
+      nav a {
+        margin: 0 15px;
+        text-decoration: none;
+        color: #5f5fc4;
+      }
+      nav a:hover {
+        text-decoration: underline;
+      }
+      .employee-list {
+        margin-top: 20px;
+      }
+      .add-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #bbb;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 24px;
+        color: #5f5fc4;
+        margin-bottom: 20px;
+      }
+      .employee-card {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 10px;
+      }
+      .employee-avatar {
+        width: 50px;
+        height: 50px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+      }
+      .employee-details {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+      .employee-info {
+        display: flex;
+        flex-direction: column;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <h1>EMPLOYÉS</h1>
-        <nav>
-            <a href="employes">Employés</a>
-            <a href="accueil">Projets</a>
-            <a href="profil">Profil</a>
-        </nav>
+      <h1>EMPLOYÉS</h1>
+      <nav>
+        <a href="employes">Employés</a>
+        <a href="listeProjets">Projets</a>
+        <a href="profil">Profil</a>
+      </nav>
     </header>
 
     <div class="employee-list">
-        <!-- Button to add a new employee -->
-        <div class="add-button">+</div>
+      <!-- Button to add a new employee -->
+      <div class="add-button">+</div>
 
-        <!-- Employee card template -->
-        <div class="employee-card">
-            <div class="employee-avatar">👤</div>
-            <div class="employee-details">
-                <div class="employee-info">
-                    <p>Prenom:</p>
-                    <p>Nom:</p>
-                </div>
-                <div class="employee-info">
-                    <p>Courriel:</p>
-                    <p>Telephone:</p>
-                </div>
-                <div class="employee-info">
-                    <p>Rôle:</p>
-                </div>
-            </div>
+      <!-- Employee card template -->
+      <div class="employee-card">
+        <div class="employee-avatar">👤</div>
+        <div class="employee-details">
+          <div class="employee-info">
+            <p>Prenom:</p>
+            <p>Nom:</p>
+          </div>
+          <div class="employee-info">
+            <p>Courriel:</p>
+            <p>Telephone:</p>
+          </div>
+          <div class="employee-info">
+            <p>Rôle:</p>
+          </div>
         </div>
+      </div>
 
-        <!-- Duplicate the above employee card block as needed -->
-        <div class="employee-card">
-            <div class="employee-avatar">👤</div>
-            <div class="employee-details">
-                <div class="employee-info">
-                    <p>Prenom:</p>
-                    <p>Nom:</p>
-                </div>
-                <div class="employee-info">
-                    <p>Courriel:</p>
-                    <p>Telephone:</p>
-                </div>
-                <div class="employee-info">
-                    <p>Rôle:</p>
-                </div>
-            </div>
+      <!-- Duplicate the above employee card block as needed -->
+      <div class="employee-card">
+        <div class="employee-avatar">👤</div>
+        <div class="employee-details">
+          <div class="employee-info">
+            <p>Prenom:</p>
+            <p>Nom:</p>
+          </div>
+          <div class="employee-info">
+            <p>Courriel:</p>
+            <p>Telephone:</p>
+          </div>
+          <div class="employee-info">
+            <p>Rôle:</p>
+          </div>
         </div>
+      </div>
 
-        <!-- Add more employee cards as needed -->
+      <!-- Add more employee cards as needed -->
     </div>
-</body>
+  </body>
 </html>
