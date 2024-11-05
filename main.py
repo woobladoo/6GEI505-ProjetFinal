@@ -48,6 +48,14 @@ def profil():
 def employes():
     return render_template('employes.html')
 
+@app.route('/projet', methods=['GET', 'POST'])
+def projet():
+    return render_template('Projets.html')
+
+@app.route('/tache', methods=['GET', 'POST'])
+def tache():
+    return render_template('Taches.html')
+
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(debug=True)
