@@ -1,37 +1,141 @@
 <!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <title>{% block title %} Page d'accueil {% endblock %}</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static', filename='css/main.css') }}"
-    />
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #5f5fc4;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .logout-button {
+            background-color: #5f5fc4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .logout-button:hover {
+            background-color: #4c4ca1;
+        }
+        .project-list {
+            margin-top: 20px;
+        }
+        .project-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .project-card h3 {
+            margin: 0;
+        }
+        .project-info {
+            text-align: right;
+            font-size: 14px;
+        }
+        .add-project {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            color: #5f5fc4;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .add-project:hover {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PROJETS</h1>
+        <div>
+            <nav>
+                <a href="employes">Employés</a>
+                <a href="accueil">Projets</a>
+                <a href="profil">Profil</a>
+                <a href="/logout" class="logout-button">Se déconnecter</a>
+            </nav>
+        </div>
+    </header>
 
-  <body>
-    <!-- Pour les messages Flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
-    <ul>
-      {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %} {% endwith %}
-    <h1>Page d'accueil</h1>
 
-    <p>Bonjour! Bienvenue sur notre site.</p>
-    <form
-      action="{{ url_for('logout') }}"
-      method="post"
-      style="display: inline"
-    >
-      <button type="submit">Se déconnecter</button>
-    </form>
+    <div class="add-project">+</div>
+
+
+    <div class="project-list">
+        <div class="project-card">
+            <h3>Projet 1: Développement Gestionnaire de Projet et de Temps</h3>
+            <div class="project-info">
+                <p>Gestionnaire: Mayatta Ndiaye</p>
+                <p>Client: Mikael Brassard</p>
+                <p>Début: 24-10-2024</p>
+                <p>Fin: 17-12-2024</p>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <h3>Projet 2: Cuisiner Biscuits</h3>
+            <div class="project-info">
+                <p>Gestionnaire: Antoine Methot</p>
+                <p>Client: Mikael Brassard</p>
+                <p>Début: 24-10-2024</p>
+                <p>Fin: 24-10-2024</p>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <h3>Projet 3: Graduer le Bac</h3>
+            <div class="project-info">
+                <p>Gestionnaire: Maxime Simard</p>
+                <p>Client: Mikael Brassard</p>
+                <p>Début: 26-08-2021</p>
+                <p>Fin: 30-05-2025</p>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <h3>Projet 4: Pas couler mes cours</h3>
+            <div class="project-info">
+                <p>Gestionnaire: Antoine Methot</p>
+                <p>Client: Mikael Brassard</p>
+                <p>Début: 26-08-2024</p>
+                <p>Fin: 30-05-2025</p>
+            </div>
+        </div>
+    </div>
+</body>
+
 
 
     
