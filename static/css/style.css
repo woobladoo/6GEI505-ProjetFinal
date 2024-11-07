@@ -2,163 +2,111 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background: url('../images/background.jpg') no-repeat center center fixed;
+    background: #eaeaea;
+    background-size: cover;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #091013;
+    background-color: #eaeaea;
     padding: 10px 20px;
-    color:#eaeaea;
+    color: #030303;
 }
+
 .divider {
-    width: 95%; /* Largeur de la ligne */
-    height: 2px; /* Épaisseur de la ligne */
-    background-color: #edf1ed; /* Couleur de la ligne */
-    margin: 10px auto; /* Espacement autour de la ligne */
+    width: 95%;
+    height: 2px;
+    background-color: #0c0e0c;
+    margin: 10px auto;
 }
+
 .taches {
     position: absolute;
     left: 20px;
-    margin-top: 50px; /* Ajuste la marge supérieure pour faire descendre le texte */
-    text-decoration: underline; /* Souligne le texte */
-    color: #eaeaea;
+    margin-top: 50px;
+    text-decoration: underline;
+    color: #030303;
 }
 
-.A_faire {
-    
-    left: 20px;
-    margin-top: 75px; /* Ajuste la marge supérieure pour faire descendre le texte */
-    text-decoration: underline; /* Souligne le texte */
-    margin-left: 150px;
-    color: #eaeaea;
-}
-.en_cours {
-    position: absolute;
-    left: 20px;
-    margin-top: -35px; /* Ajuste la marge supérieure pour faire descendre le texte */
-    text-decoration: underline; /* Souligne le texte */
-    margin-left: 575px;
-    color: #eaeaea;
-}
+
+
 .add-button {
-    width: 365px; /* Largeur du bouton */
-    height: 50px; /* Hauteur du bouton */
-    background-color: #2acc2a; /* Couleur de fond */
-    color: rgb(7, 6, 6); /* Couleur du texte */
-    font-size: 24px; /* Taille de la police */
-     /* Supprime la bordure par défaut */
-    border-radius: 5px; /* Coins arrondis */
-    cursor: pointer; /* Change le curseur au survol */
-    margin-top: 5pxpx; /* Espace au-dessus du bouton */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Ombre légère */
+    width: 100%;
+    height: 50px;
+    background-color: #ebf3eb;
+    color: rgb(7, 6, 6);
+    font-size: 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     margin-bottom: 5px;
 }
 
-.complete {
-    position: absolute;
-    left: 20px;
-    margin-top: -35px; /* Ajuste la marge supérieure pour faire descendre le texte */
-    text-decoration: underline; /* Souligne le texte */
-    margin-left: 1050px;
-    color:#eaeaea;
-}
-
 .highlight-link {
-    position: relative; /* Nécessaire pour positionner le pseudo-élément */
-    text-decoration: none; /* Supprime le soulignement par défaut du lien */
-    color: #a80c67; /* Couleur du texte du lien */
-    padding: 5px 0; /* Espacement autour du texte */
+    position: relative;
+    text-decoration: none;
+    color: #a80c67;
+    padding: 5px 0;
 }
-
-.highlight-link::before {
-    content: ""; /* Nécessaire pour le pseudo-élément */
-    position: absolute; /* Positionne le trait par rapport au lien */
-    left: 0; /* Aligne à gauche */
-    right: 0; /* Aligne à droite */
-    top: 0; /* Positionne le trait au-dessus du texte */
-    height: 2px; /* Épaisseur du trait */
-    background-color: transparent; /* Couleur par défaut (transparent) */
-    transition: background-color 0.3s ease; /* Transition pour un effet doux */
-}
-
-.highlight-link:focus::before,
-.highlight-link:hover::before,
-.highlight-link:active::before {
-    background-color: #af4c82; /* Couleur du trait lors du survol ou du clic */
-}
-
 
 .menu a {
     margin-right: 20px;
     text-decoration: none;
-    color: #eceaea;
+    color: #020202;
     font-weight: bold;
 }
 
 .user-icon {
     display: inline-block;
     font-size: 20px;
-    border: 2px solid transparent; /* Assure la transparence */
-    background-color: transparent; /* Adopte la couleur de fond du parent */
+    border: 2px solid transparent;
+    background-color: transparent;
     border-radius: 50%;
     margin-top: auto;
     vertical-align: middle;
     border-radius: 100%;
-    overflow :hidden;
+    overflow: hidden;
     margin: 0;
     padding: 0;
 }
 
-body {
-    margin: 0; /* Supprime les marges par défaut */
-    padding: 0; /* Supprime les espacements par défaut */
-}
-
 .project-details {
-    top: 20px; /* Distance du haut de l'écran */
-    right: 20px; /* Distance du bord droit de l'écran */
-    width: 90%; /* Largeur du rectangle */
+    top: 20px;
+    right: 20px;
+    width: 90%;
     margin-left: auto;
-    max-width: 600px; /* Largeur maximale pour éviter d'être trop large */
-    background-color: #f0f0f0; /* Couleur de fond du rectangle */
-    border: 2px solid #4CAF50; /* Bordure du rectangle */
-    border-radius: 8px; /* Coins arrondis */
-    padding: 15px; /* Espacement à l'intérieur du rectangle */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre légère */
-    display: flex; /* Utilisation de flexbox pour l'alignement */
-    justify-content: space-between; /* Espace entre les parties */
-    align-items: center; /* Centre verticalement les éléments */
-}
-
-.part1,
-.part2,
-.part3 {
-    display: flex; /* Utilisation de flexbox pour les parties */
-    flex-direction: column; /* Aligne le texte à la verticale dans chaque partie */
-}
-
-.part1 p,
-.part2 p,
-.part3 p {
-    margin: 0; /* Supprime les marges par défaut */
-}
-
-
-.tasks-container {
+    max-width: 600px;
+    background-color: #f0f0f0;
+    border: 2px solid #0f0f0f;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(3, 3, 3, 0.1);
     display: flex;
     justify-content: space-between;
-    padding: 20px;
+    align-items: center;
 }
 
+.part1, .part2, .part3 {
+    display: flex;
+    flex-direction: column;
+}
+
+.part1 p, .part2 p, .part3 p {
+    margin: 0;
+}
+
+
+
 .column {
-    width: 30%;
+    width: 100%;
     background-color: transparent;
     padding: 10px;
     border: 1px solid #c5c2c2;
     border-radius: 5px;
+    margin-bottom: 20px;
 }
 
 .column h2 {
@@ -166,15 +114,78 @@ body {
 }
 
 .task {
-    background-color: #19ddcd;
+    background-color: #979c9c;
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
-    border: 1px solid #080707;
+    border: 1px solid #080808;
+    color:#eaeaea;
 }
 
 .icons {
     display: flex;
     justify-content: flex-start;
-    margin-top: 5px;
+
+}
+
+/* Centrage des titres */
+.task-status {
+    display: flex;
+    justify-content: space-evenly;  /* Distributeur d'espace égal */
+    margin-bottom: 20px;  /* Espacement sous les titres */
+    flex-wrap: wrap;  /* Permet de passer à la ligne si l'espace est trop petit */
+}
+
+.A_faire, .en_cours, .complete {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #020202;
+    text-decoration: underline;
+    text-align: center;
+    width: 100%; /* Chaque titre occupe une ligne entière pour éviter le chevauchement */
+}
+
+@media (min-width: 576px) {
+    .A_faire, .en_cours, .complete {
+        width: auto;  /* Sur les écrans plus larges, les titres retrouvent leur taille d'origine */
+    }
+}
+
+.tasks-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Colonnes responsives */
+.column {
+    width: 100%;
+    background-color: transparent;
+    padding: 10px;
+    border: 1px solid #c5c2c2;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.column h2 {
+    text-align: center;
+}
+
+/* Ajuster la disposition des titres en fonction de la taille de l'écran */
+@media (min-width: 768px) {
+    .A_faire, .en_cours, .complete {
+        width: 33%; /* Chaque titre occupe 1/3 de l'espace sur les grands écrans */
+    }
+}
+
+@media (max-width: 576px) {
+    .task-status {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .A_faire, .en_cours, .complete {
+        margin-bottom: 10px; /* Espacement sous chaque titre */
+    }
 }
