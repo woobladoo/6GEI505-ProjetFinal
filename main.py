@@ -1,12 +1,19 @@
 from flask import Flask, request, url_for, redirect, render_template, session, flash ##import de la classe flask et de certaines fonctions utiles
 from datetime import date
+import sqlite3
 
 app = Flask(__name__,template_folder='templates', static_folder='static') ##Instanciation de la classe flask
 
-app.config['SECRET_KEY'] = 'gros secret' 
+app.config['SECRET_KEY'] = 'gros secret'
+DB = 'DATA.db'
 
 # users hardcoder
 users = {"admin": "password123"}
+
+def get_db():                           #connexion à la base de données
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row  # Allows us to access rows by column name
+    return conn
 
 @app.route('/', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
 def home():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
@@ -51,6 +58,10 @@ def projet():
 @app.route('/tache', methods=['GET', 'POST'])
 def tache():
     return render_template('taches.html')
+
+@app.route('/inscription', methods=['GET', 'POST'])
+def inscription():
+    return render_template('inscription.html')
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
