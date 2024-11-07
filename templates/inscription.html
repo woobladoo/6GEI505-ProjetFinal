@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <link rel="stylesheet" href="../static/css/inscription.css" />
+</head>
+<body>
+    <div class="container">
+        <h2>Inscription</h2>
+        <form id="inscriptionForm" action="#" method="POST">
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" name="nom" required>
+
+            <label for="prenom">Prénom :</label>
+            <input type="text" id="prenom" name="prenom" required>
+
+            <label for="email">Email :</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="motdepasse">Mot de passe :</label>
+            <input type="password" id="motdepasse" name="motdepasse" required>
+
+            <label for="confmotdepasse">Confirmer le mot de passe :</label>
+            <input type="password" id="confmotdepasse" name="confmotdepasse" required>
+
+            <label for="date_naissance">Date de naissance :</label>
+            <input type="date" id="date_naissance" name="date_naissance" required>
+
+            <label for="pays">Pays :</label>
+            <select id="pays" name="pays">
+                <option value="france">France</option>
+                <option value="belgique">Belgique</option>
+                <option value="suisse">Suisse</option>
+                <option value="canada">Canada</option>
+                <option value="senegal">Senegal </option>
+            </select>
+
+            <label for="adresse">Adresse :</label>
+            <input type="text" id="adresse" name="adresse" required>
+
+            <label for="role">Rôle :</label>
+            <select id="role" name="role">
+                <option value="administrateur">Adminsitrateur</option>
+                <option value="gestionnaire">Gestionnaire</option>
+                <option value="employer">Employé</option>
+            </select>
+
+            <input type="submit" value="S'inscrire">
+        </form>
+    </div>
+    <script>
+        // Fonction pour valider le mot de passe
+        document.getElementById('inscriptionForm').addEventListener('submit', function(event) {
+            var motdepasse = document.getElementById('motdepasse').value;
+            var confMotdepasse = document.getElementById('confmotdepasse').value;
+            
+            
+            // Si les mots de passe ne correspondent pas
+            if (motdepasse !== confMotdepasse) {
+                // Empêche l'envoi du formulaire
+                event.preventDefault();
+                // Affiche un message d'erreur
+                alert( "Les mots de passe ne correspondent pas. Veuillez les retaper.");
+            } else {
+                // Si les mots de passe correspondent, on vide le message d'erreur
+                errorMessage.textContent = "";
+            }
+        });
+    </script>
+    </script>
+</body>
+</html>

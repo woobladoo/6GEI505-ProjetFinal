@@ -1,0 +1,68 @@
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+      }
+      nav a {
+        margin: 0 15px;
+        text-decoration: none;
+        color: #5f5fc4;
+      }
+      nav a:hover {
+        text-decoration: underline;
+      }
+      .profile-container {
+        display: flex;
+        align-items: flex-start;
+        margin-top: 20px;
+      }
+      .profile-picture {
+        width: 100px;
+        height: 100px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+      }
+      .profile-info form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .profile-info label {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .profile-info input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: calc(100% - 18px);
+      }
+      .reset-password {
+        color: #5f5fc4;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 20px;
+      }
+      .save-button {
+        grid-column: span 2;
+        justify-self: center;
+        background-color: #5f5fc4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .save-button:hover {
+        background-color: #4c4ca1;
+      }
