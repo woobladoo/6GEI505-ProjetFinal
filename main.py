@@ -59,6 +59,10 @@ def projet():
 def tache():
     return render_template('taches.html')
 
+@app.route('/inscription', methods=['GET', 'POST'])
+def inscription():
+    return render_template('inscription.html')
+
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(debug=True)
