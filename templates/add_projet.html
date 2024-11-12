@@ -18,14 +18,14 @@
             <label for="Client">Client :</label>
             <select type="text" id="Client" name="Client" required>
                 {% for client in clients %}
-                <option value="client[0]">{{ client[2] }} {{ client[1] }}</option>
+                <option value="{{ client[0] }}">{{ client[2] }} {{ client[1] }}</option>
                 {% endfor %}
             </select>
 
             <label for="Gestionnaire">Gestionnaire :</label>
             <select type="text" id="Gestionnaire" name="Gestionnaire" required>
                 {% for gestionnaire in gestionnaires %}
-                <option value="gestionnaire[0]">{{ gestionnaire[3] }} {{ gestionnaire[2] }}</option>
+                <option value="{{ gestionnaire[0] }}">{{ gestionnaire[3] }} {{ gestionnaire[2] }}</option>
                 {% endfor %}
             </select>
 
