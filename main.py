@@ -15,6 +15,15 @@ def get_db():                           #connexion à la base de données
     conn.row_factory = sqlite3.Row  # Allows us to access rows by column name
     return conn
 
+def check_user_exists(username, password):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM Employe WHERE courriel = ? AND motPasse = ?", (username, password))
+    user = cursor.fetchone()
+    
+    return user is not None
+
 def get_projets():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
@@ -74,7 +83,7 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         # Check if the username exists and password matches
-        if username in users and users[username] == password:
+        if check_user_exists(username, password):
             session['username'] = username  # Start a session
             flash('Login successful!', 'success')
             return redirect(url_for('listeProjets'))
