@@ -12,10 +12,9 @@
         nav a {
             margin: 0 15px;
             text-decoration: none;
-            color: #5f5fc4;
         }
         nav a:hover {
-            text-decoration: underline;
+            text-decoration: none;
         }
         .logout-button {
             background-color: #5f5fc4;
@@ -49,20 +48,18 @@
             font-size: 14px;
         }
         .add-project {
-            outline: none;
             text-decoration: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            font-size: 24px;
-            border: 1px solid #ddd;
+            border: 2px solid #bbb;
             border-radius: 5px;
             padding: 10px;
-            color: #5f5fc4;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
+            cursor: pointer;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         .add-project:hover {
             background-color: #f2f2f2;

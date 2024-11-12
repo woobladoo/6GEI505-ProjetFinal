@@ -112,9 +112,46 @@ def inscription():
 def add_projet():
     clients = get_clients()
     gestionnaires = get_gestionnaires()
+
+
     return render_template('add_projet.html', clients = clients, gestionnaires = gestionnaires)
+
+@app.route('/add_projet_todb', methods=['POST'])
+def add_projet_todb():
+    # Get form data from the request
+    nom = request.form['nom']
+    client_id = request.form['Client']
+    gestionnaire_id = request.form['Gestionnaire']
+    date_debut = request.form['date_debut']
+    date_fin = request.form['date_fin']
+    is_template = request.form['Template']
+
+    # Connect to the database and insert the new project
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+    query = '''
+    INSERT INTO Projet (idClient, etatProjet, idChef, nom, dateDebut, dateFin, isTemplate)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    '''
+    cursor.execute(query, (client_id, 1, gestionnaire_id, nom, date_debut, date_fin, is_template))
+    conn.commit()
+    conn.close()
+
+    # Redirect back to the form page or another page after successful insertion
+    return redirect(url_for('listeProjets'))
+
+
+@app.route('/delete_projet/<int:projet_id>', methods=['POST'])
+def delete_projet(projet_id):
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+    query = 'DELETE FROM Projet WHERE id = ?'
+    cursor.execute(query, (projet_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('listeProjets'))  # Redirect to the project list or another page
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(debug=True)
-
