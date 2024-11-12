@@ -15,13 +15,41 @@ def get_db():                           #connexion à la base de données
     conn.row_factory = sqlite3.Row  # Allows us to access rows by column name
     return conn
 
+def get_projets():
+    conn = sqlite3.connect(DB) # Connect to DB
+    cursor = conn.cursor()
+
+    query = '''
+    SELECT Projet.id, Projet.idClient, Projet.etatProjet, Projet.idChef, Projet.nom, Projet.dateDebut, Projet.dateFin,
+        Client.prenom || ' ' || Client.nom AS client_name, Employe.prenom || ' ' || Employe.nom AS manager_name
+    FROM Projet
+    LEFT JOIN Client ON Projet.idClient = Client.id
+    LEFT JOIN Employe ON Projet.idChef = Employe.id
+    '''
+
+
+
+    cursor.execute(query) #Cherche tous les projets dans la table projet
+    projets = cursor.fetchall()
+
+    print(projets)
+
+    conn.close()
+
+    return projets
+
+
+
 @app.route('/', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
 def home():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
   return redirect(url_for('login'))
 
 @app.route('/listeProjets', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
 def listeProjets():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
-  return render_template('listeProjets.html')
+  
+  projets = get_projets() #Chercher tous les projets dans table Projets de la BD
+
+  return render_template('listeProjets.html', projets = projets)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -62,6 +90,10 @@ def tache():
 @app.route('/inscription', methods=['GET', 'POST'])
 def inscription():
     return render_template('inscription.html')
+
+@app.route('/add_projet', methods=['GET', 'POST'])
+def add_projet():
+    return render_template('add_projet.html')
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
