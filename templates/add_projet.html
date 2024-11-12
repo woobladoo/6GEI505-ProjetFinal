@@ -16,7 +16,11 @@
             <input type="text" id="nom" name="nom" required>
 
             <label for="Client">Client :</label>
-            <input type="text" id="Client" name="Client" required>
+            <select type="text" id="Client" name="Client" required>
+                {% for client in clients %}
+                <option value="client[0]">{{ client[2] }} {{ client[1] }}</option>
+                {% endfor %}
+            </select>
 
             <label for="Gestionnaire">Gestionnaire :</label>
             <input type="text" id="Gestionnaire" name="Gestionnaire" required>
@@ -36,10 +40,12 @@
             <input type="submit" value="S'inscrire">
         </form>
     </div>
+
     <script>
         function goBack(){
             window.history.back();
         }
     </script>
+
 </body>
 </html>

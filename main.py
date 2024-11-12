@@ -26,18 +26,25 @@ def get_projets():
     LEFT JOIN Client ON Projet.idClient = Client.id
     LEFT JOIN Employe ON Projet.idChef = Employe.id
     '''
-
-
-
     cursor.execute(query) #Cherche tous les projets dans la table projet
     projets = cursor.fetchall()
-
-    print(projets)
-
     conn.close()
-
     return projets
 
+def get_clients():
+    conn = sqlite3.connect(DB) # Connect to DB
+    cursor = conn.cursor()
+
+    query = '''
+    SELECT id, nom, prenom, courriel, telephone, status
+    FROM Client
+    '''
+
+    cursor.execute(query)
+    clients = cursor.fetchall()
+    print(clients)
+    conn.close
+    return clients
 
 
 @app.route('/', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
@@ -46,9 +53,7 @@ def home():           ##Fonction pour gérer la réaction de la page d'accueil, 
 
 @app.route('/listeProjets', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
 def listeProjets():           ##Fonction pour gérer la réaction de la page d'accueil, le titre est dynamique
-  
   projets = get_projets() #Chercher tous les projets dans table Projets de la BD
-
   return render_template('listeProjets.html', projets = projets)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -93,7 +98,8 @@ def inscription():
 
 @app.route('/add_projet', methods=['GET', 'POST'])
 def add_projet():
-    return render_template('add_projet.html')
+    clients = get_clients()
+    return render_template('add_projet.html', clients = clients)
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
