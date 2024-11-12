@@ -23,7 +23,11 @@
             </select>
 
             <label for="Gestionnaire">Gestionnaire :</label>
-            <input type="text" id="Gestionnaire" name="Gestionnaire" required>
+            <select type="text" id="Gestionnaire" name="Gestionnaire" required>
+                {% for gestionnaire in gestionnaires %}
+                <option value="gestionnaire[0]">{{ gestionnaire[3] }} {{ gestionnaire[2] }}</option>
+                {% endfor %}
+            </select>
 
             <label for="date_debut">Début du projet :</label>
             <input type="date" id="date_debut" name="date_debut" required>

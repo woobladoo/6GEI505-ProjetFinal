@@ -34,17 +34,29 @@ def get_projets():
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
-
     query = '''
     SELECT id, nom, prenom, courriel, telephone, status
     FROM Client
     '''
-
     cursor.execute(query)
     clients = cursor.fetchall()
     print(clients)
     conn.close
     return clients
+
+def get_gestionnaires():
+    conn = sqlite3.connect(DB) # Connect to DB
+    cursor = conn.cursor()
+    query = '''
+    SELECT id, idRole, nom, prenom
+    FROM Employe
+    WHERE idRole = 1 OR idRole = 2
+    '''
+    cursor.execute(query)
+    gestionnaires = cursor.fetchall()
+    print(gestionnaires)
+    conn.close
+    return gestionnaires
 
 
 @app.route('/', methods=['GET', 'POST'])        ##Définition de l'url d'accueil
@@ -99,7 +111,8 @@ def inscription():
 @app.route('/add_projet', methods=['GET', 'POST'])
 def add_projet():
     clients = get_clients()
-    return render_template('add_projet.html', clients = clients)
+    gestionnaires = get_gestionnaires()
+    return render_template('add_projet.html', clients = clients, gestionnaires = gestionnaires)
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
