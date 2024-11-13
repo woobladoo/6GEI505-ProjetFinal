@@ -18,7 +18,7 @@ label {
     font-weight: bold;
     margin-top: 10px;
 }
-input[type="text"], input[type="email"], input[type="password"], input[type="date"], select, textarea {
+input[type="text"], input[type="date"], select, textarea {
     width: 100%;
     padding: 8px;
     margin-top: 5px;

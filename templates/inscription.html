@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../static/css/inscription.css" />
 </head>
 <body>
+    <button onclick="goBack()">Back</button>
     <div class="container">
         <h2>Inscription</h2>
         <form id="inscriptionForm" action="#" method="POST">
@@ -68,6 +69,10 @@
                 errorMessage.textContent = "";
             }
         });
+
+        function goBack(){
+            window.history.back();
+        }
     </script>
     </script>
 </body>

@@ -12,10 +12,13 @@
         nav a {
             margin: 0 15px;
             text-decoration: none;
-            color: #5f5fc4;
         }
         nav a:hover {
-            text-decoration: underline;
+            text-decoration: none;
+        }
+
+        nav a:visited{
+            text-decoration: none;
         }
         .logout-button {
             background-color: #5f5fc4;
@@ -45,24 +48,36 @@
             margin: 0;
         }
         .project-info {
-            text-align: right;
+            text-align: left;
             font-size: 14px;
         }
         .add-project {
+            text-decoration: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            font-size: 24px;
-            border: 1px solid #ddd;
+            border: 2px solid #bbb;
             border-radius: 5px;
             padding: 10px;
-            color: #5f5fc4;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
+            cursor: pointer;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         .add-project:hover {
             background-color: #f2f2f2;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #ff0000; /* Change color as desired */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #b13535; /* Darker shade for hover effect */
         }
