@@ -24,10 +24,6 @@ def check_user_exists(username, password):
     
     return user is not None
 
-@app.route('/check-session')
-def check_session():
-    return f"Role in session: {session.get('role')}"
-
 def get_user_role(username):
     conn = get_db()
     cursor = conn.cursor()
@@ -35,6 +31,14 @@ def get_user_role(username):
     role = cursor.fetchone()
     conn.close()
     return role[0] if role else None
+
+def get_employes():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT prenom, nom, courriel, telephone, idRole FROM Employe")  # Adjust columns as needed
+    employes = cursor.fetchall()
+    conn.close()
+    return employes
 
 def get_projets():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -118,7 +122,8 @@ def profil():
 
 @app.route('/employes', methods=['GET', 'POST'])
 def employes():
-    return render_template('employes.html')
+    listeEmploye = get_employes()
+    return render_template('employes.html', employes=listeEmploye)
 
 @app.route('/projet', methods=['GET', 'POST'])
 def projet():

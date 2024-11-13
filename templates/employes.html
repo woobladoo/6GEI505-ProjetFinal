@@ -20,42 +20,29 @@
     <div class="employee-list">
       <!-- Button to add a new employee -->
       <div class="add-button">+</div>
-
+      {% for employe in employes %}
       <!-- Employee card template -->
       <div class="employee-card">
         <div class="employee-avatar">👤</div>
         <div class="employee-details">
           <div class="employee-info">
-            <p>Prenom:</p>
-            <p>Nom:</p>
+            <p>Prenom: {{ employe[0] }}</p>
+            <p>Nom: {{ employe[1] }}</p>
           </div>
           <div class="employee-info">
-            <p>Courriel:</p>
-            <p>Telephone:</p>
+            <p>Courriel: {{ employe[2] }}</p>
+            <p>Telephone: {{ employe[3] }}</p>
           </div>
           <div class="employee-info">
-            <p>Rôle:</p>
+            <p>
+              Rôle: {% if employe[4] == 1 %} Administrateur {% elif employe[4]
+              == 2 %} Chef de projet {% elif employe[4] == 3 %} Employé {% endif
+              %}
+            </p>
           </div>
         </div>
       </div>
-
-      <!-- Duplicate the above employee card block as needed -->
-      <div class="employee-card">
-        <div class="employee-avatar">👤</div>
-        <div class="employee-details">
-          <div class="employee-info">
-            <p>Prenom:</p>
-            <p>Nom:</p>
-          </div>
-          <div class="employee-info">
-            <p>Courriel:</p>
-            <p>Telephone:</p>
-          </div>
-          <div class="employee-info">
-            <p>Rôle:</p>
-          </div>
-        </div>
-      </div>
+      {% endfor %}
 
       <!-- Add more employee cards as needed -->
     </div>
