@@ -12,7 +12,9 @@
         <h1>PROJETS</h1>
         <div>
             <nav>
+                {% if session.get('role') == 1 %}
                 <a href="inscription">Inscrire</a>
+                {% endif %}
                 <a href="employes">Employés</a>
                 <a href="listeProjets">Projets</a>
                 <a href="profil">Profil</a>

@@ -24,6 +24,18 @@ def check_user_exists(username, password):
     
     return user is not None
 
+@app.route('/check-session')
+def check_session():
+    return f"Role in session: {session.get('role')}"
+
+def get_user_role(username):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT idRole FROM Employe WHERE courriel = ?", (username,))
+    role = cursor.fetchone()
+    conn.close()
+    return role[0] if role else None
+
 def get_projets():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
@@ -85,6 +97,9 @@ def login():
         # Check if the username exists and password matches
         if check_user_exists(username, password):
             session['username'] = username  # Start a session
+            user_role = get_user_role(username)
+            if user_role:
+                session['role'] = user_role
             flash('Login successful!', 'success')
             return redirect(url_for('listeProjets'))
         else:
