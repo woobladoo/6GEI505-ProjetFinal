@@ -21,11 +21,9 @@
 
     <div class="employee-list">
       <!-- Button to add a new employee -->
-
       <a href="{{ url_for('inscription') }}">
         <div class="add-button">+</div>
-      </a>
-
+    </a>
       {% for employe in employes %}
       <!-- Employee card template -->
       <div class="employee-card">
