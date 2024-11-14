@@ -16,17 +16,11 @@
     <div class="header">
       <h4>PROJET 1: Développement Gestionnaire de Projet et de Temps</h4>
       <div class="menu">
-        <a href="{{ url_for('listeProjets') }}" class="highlight-link"
-          >Projets</a
-        >
+        <a href="{{ url_for('listeProjets') }}" class="highlight-link">Projets</a>
         <a href="{{ url_for('profil') }}" class="highlight-link">Profil</a>
         <a href="#" class="user-icon">
-          <img
-            src="../static/images/icon_utiliateur.jpg"
-            alt="User Icon"
-            width="40"
-            height="40"
-        /></a>
+          <img src="../static/images/icon_utiliateur.jpg" alt="User Icon" width="40" height="40"/>
+        </a>
       </div>
     </div>
     <div class="divider"></div>
@@ -49,26 +43,24 @@
         <p>Fin: 17-12-2024</p>
       </div>
     </div>
-    <h4 class="A_faire">À FAIRE</h4>
-    <h4 class="en_cours">EN COURS</h4>
-    <h4 class="complete">COMPLETÉ</h4>
-    <div class="tasks-container">
-      <div class="column">
-        <button
-          class="add-button"
-          onclick="window.location.href='{{ url_for('tache') }}'"
-        >
-          +
-        </button>
+    <div class="task-status">
+      <h4 class="A_faire">À FAIRE</h4>
+      <h4 class="en_cours">EN COURS</h4>
+      <h4 class="complete">COMPLÉTÉ</h4>
+    </div>
 
-        <div class="task">
+    <div class="tasks-container row">
+      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <button class="add-button" onclick="window.location.href='{{ url_for('tache') }}'">+</button>
+        
+        <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
           <p>Créer serveur flask</p>
           <p>Début: 24-10-2024</p>
           <p>Fin: 17-12-2024</p>
           <p>Statut:</p>
           <div class="icons">👤👤👤</div>
         </div>
-        <div class="task">
+        <div class="task" id="task2" draggable="true" ondragstart="drag(event)">
           <p>Faire code javascript</p>
           <p>Début: 24-10-2024</p>
           <p>Fin: 17-12-2024</p>
@@ -76,10 +68,11 @@
           <div class="icons">👤👤👤</div>
         </div>
       </div>
-      <div class="column">
-        <button class="add-button">+</button>
 
-        <div class="task">
+      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <button class="add-button" onclick="window.location.href='{{ url_for('tache') }}'">+</button>
+
+        <div class="task" id="task3" draggable="true" ondragstart="drag(event)">
           <p>Revu de l'état de l'art</p>
           <p>Début: 24-10-2024</p>
           <p>Fin: 17-12-2024</p>
@@ -87,10 +80,32 @@
           <div class="icons">👤👤👤</div>
         </div>
       </div>
-      <div class="column">
-        <button class="add-button">+</button>
+
+      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <button class="add-button" onclick="window.location.href='{{ url_for('tache') }}'">+</button>
       </div>
     </div>
+
+    <script>
+      // Fonction pour autoriser le dépôt
+      function allowDrop(ev) {
+        ev.preventDefault(); // Permet de déposer l'élément
+      }
+
+      // Fonction pour commencer à draguer l'élément
+      function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
+      }
+
+      // Fonction pour gérer le dépôt de l'élément
+      function drop(ev) {
+        ev.preventDefault(); // Empêche l'action par défaut
+        var data = ev.dataTransfer.getData("text");
+        var draggedElement = document.getElementById(data); // Récupère l'élément dragué
+        ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+      }
+    </script>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

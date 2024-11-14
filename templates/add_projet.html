@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajout de Projet</title>
+    <link rel="stylesheet" href="../static/css/add_projet.css" />
+</head>
+<body>
+    <button onclick="goBack()">Back</button>
+
+    <div class="container">
+        <h2>Création Projet</h2>
+        <form id="inscriptionForm" action="add_projet_todb" method="POST">
+            <label for="nom">Nom du Projet :</label>
+            <input type="text" id="nom" name="nom" required>
+
+            <label for="Client">Client :</label>
+            <select type="text" id="Client" name="Client" required>
+                {% for client in clients %}
+                <option value="{{ client[0] }}">{{ client[2] }} {{ client[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="Gestionnaire">Gestionnaire :</label>
+            <select type="text" id="Gestionnaire" name="Gestionnaire" required>
+                {% for gestionnaire in gestionnaires %}
+                <option value="{{ gestionnaire[0] }}">{{ gestionnaire[3] }} {{ gestionnaire[2] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="date_debut">Début du projet :</label>
+            <input type="date" id="date_debut" name="date_debut" required>
+
+            <label for="date_fin">Fin du projet :</label>
+            <input type="date" id="date_fin" name="date_fin" required>
+
+            <label for="Template">Est-ce que c'est un projet Template? :</label>
+            <select id="Template" name="Template">
+                <option value="0">Non</option>
+                <option value="1">Oui</option>
+            </select>
+
+            <input type="submit" value="S'inscrire">
+        </form>
+    </div>
+
+    <script>
+        function goBack(){
+            window.history.back();
+        }
+    </script>
+
+</body>
+</html>
