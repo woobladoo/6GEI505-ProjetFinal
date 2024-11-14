@@ -133,10 +133,6 @@ def projet():
 def tache():
     return render_template('taches.html')
 
-@app.route('/inscription', methods=['GET', 'POST'])
-def inscription():
-    return render_template('inscription.html')
-
 @app.route('/add_projet', methods=['GET', 'POST'])
 def add_projet():
     clients = get_clients()
@@ -180,7 +176,38 @@ def delete_projet(projet_id):
     conn.close()
 
     return redirect(url_for('listeProjets'))  # Redirect to the project list or another page
+@app.route('/inscription', methods=['GET', 'POST'])
+def inscription():
+    if request.method == 'POST':
+        # Récupération des données du formulaire
+        nom = request.form['nom']
+        prenom = request.form['prenom']
+        username = request.form['email']
+        telephone = request.form['telephone']
+        idrole = request.form['idrole']
+        mot_de_passe = request.form['motdepasse']
 
+        # Hachage du mot de passe
+
+        # Connexion à la base de données et ajout de l'utilisateur
+        conn = sqlite3.connect(DB)
+        cursor = conn.cursor()
+        
+        query ='INSERT INTO Employe (idrole, nom, prenom, courriel, telephone, motPasse) VALUES (?, ?, ?, ?, ?, ?)'
+        try:
+            cursor.execute(query, (idrole, nom, prenom, username, telephone, mot_de_passe))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            flash("Ce numéro de téléphone est déjà enregistré.", "error")
+            return redirect(url_for('inscription'))
+        finally:
+            conn.close()
+        
+
+        flash("Utilisateur ajouté avec succès", "success")
+        return redirect(url_for('login'))
+
+    return render_template('inscription.html')
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(debug=True)
