@@ -35,7 +35,7 @@ def get_user_role(username):
 def get_employes():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT prenom, nom, courriel, telephone, idRole FROM Employe")  # Adjust columns as needed
+    cursor.execute("SELECT id, prenom, nom, courriel, telephone, idRole FROM Employe")  # Adjust columns as needed
     employes = cursor.fetchall()
     conn.close()
     return employes
@@ -175,7 +175,17 @@ def delete_projet(projet_id):
     conn.commit()
     conn.close()
 
-    return redirect(url_for('listeProjets'))  # Redirect to the project list or another page
+@app.route('/delete_employee/<int:employee_id>', methods=['POST'])
+def delete_employee(employee_id):
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+    query = 'DELETE FROM Employe WHERE id = ?'
+    cursor.execute(query, (employee_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('employes'))  # Redirect to the project list or another page
+
 @app.route('/inscription', methods=['GET', 'POST'])
 def inscription():
     if request.method == 'POST':

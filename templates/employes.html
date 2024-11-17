@@ -31,20 +31,25 @@
         <div class="employee-avatar">👤</div>
         <div class="employee-details">
           <div class="employee-info">
-            <p>Prenom: {{ employe[0] }}</p>
-            <p>Nom: {{ employe[1] }}</p>
+            <p>Prenom: {{ employe[1] }}</p>
+            <p>Nom: {{ employe[2] }}</p>
           </div>
           <div class="employee-info">
-            <p>Courriel: {{ employe[2] }}</p>
-            <p>Telephone: {{ employe[3] }}</p>
+            <p>Courriel: {{ employe[3] }}</p>
+            <p>Telephone: {{ employe[4] }}</p>
           </div>
           <div class="employee-info">
             <p>
-              Rôle: {% if employe[4] == 1 %} Administrateur {% elif employe[4]
-              == 2 %} Chef de projet {% elif employe[4] == 3 %} Employé {% endif
+              Rôle: {% if employe[5] == 1 %} Administrateur {% elif employe[5]
+              == 2 %} Chef de projet {% elif employe[5] == 3 %} Employé {% endif
               %}
             </p>
           </div>
+          <form action="{{ url_for('delete_employee', employee_id=employe[0]) }}" method="POST" style="display:inline;">
+            <button type="submit" onclick="return confirm('Are you sure you want to delete this Employee?');">
+                Delete
+            </button>
+        </form>
         </div>
       </div>
       {% endfor %}
