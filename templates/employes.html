@@ -19,10 +19,11 @@
 
     <div class="employee-list">
       <!-- Button to add a new employee -->
+      {% if session.get('role') == 1 %}
       <a href="{{ url_for('inscription') }}">
         <div class="add-button">+</div>
-    </a>
-
+      </a>
+      {% endif %}
       {% for employe in employes %}
       <!-- Employee card template -->
       <div class="employee-card">
