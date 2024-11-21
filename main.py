@@ -188,10 +188,11 @@ def add_tache():
 
     if name and start and end:
         # Connexion à SQLite (ou une autre base de données)
+        ######################################AJOUT AVEC PROJET ID##################################
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Tache_tch (nom, dateDebut, dateFin)
+            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin)
             VALUES (?, ?, ?)
         """, (name, start, end))
         conn.commit()
