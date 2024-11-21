@@ -11,6 +11,8 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+
+
   </head>
   <body>
     <div class="header">
@@ -137,6 +139,7 @@
           <div class="task-form-overlay">
             <div class="task-form">
               <h5>Ajouter une Tâche</h5>
+              <input type="hidden" id="task-project" class="form-control" value="{{ projet[0] }}" required />
               <label for="task-name">Nom de la tâche:</label>
               <input type="text" id="task-name" class="form-control" required />
 
@@ -163,6 +166,7 @@
 
       // Fonction pour ajouter une tâche
       function addTask() {
+        const projid = document.getElementById("task-project").value;
         const name = document.getElementById("task-name").value;
         const start = document.getElementById("task-start").value;
         const end = document.getElementById("task-end").value;
@@ -210,6 +214,7 @@
 
       // Ajoutez le bouton de suppression lors de la création d'une tâche dynamique
       async function addTask() {
+        const projid = document.getElementById("task-project").value;
         const name = document.getElementById("task-name").value;
         const start = document.getElementById("task-start").value;
         const end = document.getElementById("task-end").value;
@@ -245,7 +250,7 @@
             const response = await fetch("/add_tache", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, start, end }),
+              body: JSON.stringify({ projid, name, start, end }),
             });
             if (!response.ok) {
               throw new Error("Erreur lors de l’ajout à la base de données.");

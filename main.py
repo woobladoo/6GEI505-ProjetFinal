@@ -198,22 +198,23 @@ def tache(id):
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
     data = request.json
+    print(data)
     name = data.get('name')
     start = data.get('start')
     end = data.get('end')
+    proj_id = data.get('projid')
 
     if name and start and end:
         # Connexion à SQLite (ou une autre base de données)
-        ######################################AJOUT AVEC PROJET ID##################################
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin)
-            VALUES (?, ?, ?)
-        """, (name, start, end))
+            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin, tch_proj_id, tch_etat_etat)
+            VALUES (?, ?, ?, ?, 1)
+        """, (name, start, end, proj_id))
         conn.commit()
         conn.close()
-        return jsonify({"message": "Tâche ajoutée avec succès!"}), 201
+        return redirect(url_for('listeProjets'))
 
     return jsonify({"error": "Données incomplètes"}), 400
 
