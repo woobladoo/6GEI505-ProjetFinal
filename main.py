@@ -32,6 +32,14 @@ def get_user_role(username):
     conn.close()
     return role[0] if role else None
 
+def get_user(username):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Employee_emp WHERE emp_courriel = ?;", (username,))  # Adjust columns as needed
+    user = cursor.fetchall()
+    conn.close()
+    return user
+
 def get_employes():
     conn = get_db()
     cursor = conn.cursor()
@@ -134,12 +142,20 @@ def logout():
 
 @app.route('/profil', methods=['GET', 'POST'])
 def profil():
-    return render_template('profil.html')
+    courriel = session.get('username')
+    user = get_user(courriel)
+    return render_template('profil.html', user=user)
 
 @app.route('/employes', methods=['GET', 'POST'])
 def employes():
     listeEmploye = get_employes()
     return render_template('employes.html', employes=listeEmploye)
+
+
+
+
+
+
 
 @app.route('/projet/<int:id>', methods=['GET'])
 def projet(id):
@@ -188,10 +204,11 @@ def add_tache():
 
     if name and start and end:
         # Connexion à SQLite (ou une autre base de données)
+        ######################################AJOUT AVEC PROJET ID##################################
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Tache_tch (nom, dateDebut, dateFin)
+            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin)
             VALUES (?, ?, ?)
         """, (name, start, end))
         conn.commit()
@@ -253,6 +270,44 @@ def delete_employee(employee_id):
     conn.close()
 
     return redirect(url_for('employes'))  # Redirect to the project list or another page
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    session_courriel = session.get('username')
+    user = get_user(session_courriel)
+    # Get the form data from the request
+    prenom = request.form['prenom']
+    nom = request.form['nom']
+    courriel = request.form['courriel']
+    telephone = request.form['telephone']
+    role = request.form['role']
+    print(user[0]['emp_id'])
+    print(prenom)
+    print(nom)
+    print(courriel)
+    print(telephone)
+    print(role)
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Update the user data using a parameterized query
+    cursor.execute("""
+        UPDATE Employee_emp
+        SET emp_prenom = ?, emp_nom = ?, emp_courriel = ?, emp_telephone = ?, emp_role_id = ?
+        WHERE emp_id = ?
+    """, (prenom, nom, courriel, telephone, role, user[0]['emp_id']))
+
+    conn.commit()
+    conn.close()
+
+    # Update the user information in the database
+    #update_user_in_db(user_id, prenom, nom, courriel, telephone, role)
+
+    # After updating, redirect to the profile page
+    return redirect(url_for('profil'))
+
+
 
 @app.route('/inscription', methods=['GET', 'POST'])
 def inscription():

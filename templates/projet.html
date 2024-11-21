@@ -202,6 +202,7 @@
       // Fonction pour supprimer une tâche
       function deleteTask(taskId) {
         const taskElement = document.getElementById(taskId);
+        console.log(taskId);
         if (taskElement) {
           taskElement.remove(); // Supprime l'élément du DOM
         }
