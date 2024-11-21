@@ -259,6 +259,22 @@ def add_tache():
 
     return jsonify({"error": "Données incomplètes"}), 400
 
+@app.route('/delete_tache/<int:projid>/<int:tacheid>', methods=['POST'])
+def delete_tache(tacheid, projid):
+    # Connect to the database
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Execute DELETE statement to remove the task by its ID
+    cursor.execute("DELETE FROM Tache_tch WHERE tch_id = ?", (tacheid,))
+    conn.commit()
+    conn.close()
+
+    # Redirect to the project or task page (depending on how you want to handle it)
+    flash('Task deleted successfully', 'success')
+    return redirect(url_for('projet', id=projid))  # Redirect to the project page, adjust as needed
+
+
 @app.route('/add_projet', methods=['GET', 'POST'])
 def add_projet():
     clients = get_clients()
@@ -312,6 +328,7 @@ def delete_employee(employee_id):
     conn.close()
 
     return redirect(url_for('employes'))  # Redirect to the project list or another page
+
 
 @app.route('/update_profile', methods=['POST'])
 def update_profile():

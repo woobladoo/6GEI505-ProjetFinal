@@ -31,9 +31,10 @@
     <div class="divider"></div>
     <h4 class="taches">
       {{ taches[1] }}
-      <button type="button" class="btn btn-outline-danger m-3">
-        Supprimer Tâche
-      </button>
+      <form method="POST" action="{{ url_for('delete_tache', projid=projet[0], tacheid=taches[0]['tch_id']) }}">
+        <button type="submit" class="button">Delete Task</button>
+    </form>
+    
     </h4>
 
     <div class="project-details">
