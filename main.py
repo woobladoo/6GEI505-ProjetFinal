@@ -19,7 +19,7 @@ def check_user_exists(username, password):
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute("SELECT * FROM Employe WHERE courriel = ? AND motPasse = ?", (username, password))
+    cursor.execute("SELECT * FROM Employee_emp WHERE emp_courriel = ? AND emp_motPasse = ?;", (username, password))
     user = cursor.fetchone()
     
     return user is not None
@@ -27,7 +27,7 @@ def check_user_exists(username, password):
 def get_user_role(username):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT idRole FROM Employe WHERE courriel = ?", (username,))
+    cursor.execute("SELECT emp_role_id AS idRole FROM Employee_emp WHERE emp_courriel = ?;", (username,))
     role = cursor.fetchone()
     conn.close()
     return role[0] if role else None
@@ -35,7 +35,7 @@ def get_user_role(username):
 def get_employes():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, prenom, nom, courriel, telephone, idRole FROM Employe")  # Adjust columns as needed
+    cursor.execute("SELECT emp_id AS id, emp_prenom AS prenom, emp_nom AS nom, emp_courriel AS courriel, emp_telephone AS telephone, emp_role_id AS idRole FROM Employee_emp;")  # Adjust columns as needed
     employes = cursor.fetchall()
     conn.close()
     return employes
@@ -45,11 +45,19 @@ def get_projets():
     cursor = conn.cursor()
 
     query = '''
-    SELECT Projet.id, Projet.idClient, Projet.etatProjet, Projet.idChef, Projet.nom, Projet.dateDebut, Projet.dateFin,
-        Client.prenom || ' ' || Client.nom AS client_name, Employe.prenom || ' ' || Employe.nom AS manager_name
-    FROM Projet
-    LEFT JOIN Client ON Projet.idClient = Client.id
-    LEFT JOIN Employe ON Projet.idChef = Employe.id
+    SELECT Projet_proj.proj_id AS id, 
+        Projet_proj.proj_clnt_id AS idClient, 
+        Projet_proj.proj_etat_etat AS etatProjet, 
+        Projet_proj.proj_emp_id AS idChef, 
+        Projet_proj.proj_nom AS nom, 
+        Projet_proj.proj_dateDebut AS dateDebut, 
+        Projet_proj.proj_dateFin AS dateFin, 
+        Client_clnt.clnt_prenom || ' ' || Client_clnt.clnt_nom AS client_name, 
+        Employee_emp.emp_prenom || ' ' || Employee_emp.emp_nom AS manager_name
+    FROM Projet_proj
+    LEFT JOIN Client_clnt ON Projet_proj.proj_clnt_id = Client_clnt.clnt_id
+    LEFT JOIN Employee_emp ON Projet_proj.proj_emp_id = Employee_emp.emp_id;
+
     '''
     cursor.execute(query) #Cherche tous les projets dans la table projet
     projets = cursor.fetchall()
@@ -60,8 +68,13 @@ def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
     query = '''
-    SELECT id, nom, prenom, courriel, telephone, status
-    FROM Client
+    SELECT clnt_id AS id, 
+        clnt_nom AS nom, 
+        clnt_prenom AS prenom, 
+        clnt_courriel AS courriel, 
+        clnt_telephone AS telephone, 
+        clnt_status AS status
+    FROM Client_clnt;
     '''
     cursor.execute(query)
     clients = cursor.fetchall()
@@ -73,9 +86,12 @@ def get_gestionnaires():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
     query = '''
-    SELECT id, idRole, nom, prenom
-    FROM Employe
-    WHERE idRole = 1 OR idRole = 2
+    SELECT emp_id AS id, 
+        emp_role_id AS idRole, 
+        emp_nom AS nom, 
+        emp_prenom AS prenom
+    FROM Employee_emp
+    WHERE emp_role_id = 1 OR emp_role_id = 2;
     '''
     cursor.execute(query)
     gestionnaires = cursor.fetchall()
@@ -206,8 +222,8 @@ def add_projet_todb():
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
     query = '''
-    INSERT INTO Projet (idClient, etatProjet, idChef, nom, dateDebut, dateFin, isTemplate)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO Projet_proj (proj_clnt_id, proj_etat_etat, proj_emp_id, proj_nom, proj_dateDebut, proj_dateFin, proj_isTemplate)
+    VALUES (?, ?, ?, ?, ?, ?, ?);
     '''
     cursor.execute(query, (client_id, 1, gestionnaire_id, nom, date_debut, date_fin, is_template))
     conn.commit()
@@ -221,16 +237,17 @@ def add_projet_todb():
 def delete_projet(projet_id):
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
-    query = 'DELETE FROM Projet WHERE id = ?'
+    query = 'DELETE FROM Projet_proj WHERE proj_id = ?;'
     cursor.execute(query, (projet_id,))
     conn.commit()
     conn.close()
+    return redirect(url_for('listeProjets'))  # Redirect to the project list or another page
 
 @app.route('/delete_employee/<int:employee_id>', methods=['POST'])
 def delete_employee(employee_id):
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
-    query = 'DELETE FROM Employe WHERE id = ?'
+    query = 'DELETE FROM Employee_emp WHERE emp_id = ?;'
     cursor.execute(query, (employee_id,))
     conn.commit()
     conn.close()
@@ -254,7 +271,7 @@ def inscription():
         conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         
-        query ='INSERT INTO Employe (idrole, nom, prenom, courriel, telephone, motPasse) VALUES (?, ?, ?, ?, ?, ?)'
+        query ='INSERT INTO Employee_emp (emp_role_id, emp_nom, emp_prenom, emp_courriel, emp_telephone, emp_motPasse) VALUES (?, ?, ?, ?, ?, ?);'
         try:
             cursor.execute(query, (idrole, nom, prenom, username, telephone, mot_de_passe))
             conn.commit()
