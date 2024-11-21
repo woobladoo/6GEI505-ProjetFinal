@@ -23,8 +23,7 @@
         <span>👤</span>
       </div>
       <div class="profile-info">
-        <a href="#" class="reset-password">REINITIALISE MOT DE PASSE</a>
-        <form>
+        <form method="POST" action="/update_profile">
           <label for="prenom">Prenom</label>
           <input type="text" id="prenom" name="prenom" value="{{ user[0]['emp_prenom'] }}" />
 
