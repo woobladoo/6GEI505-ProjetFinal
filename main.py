@@ -180,16 +180,17 @@ def projet(id):
     return render_template('projet.html', projet=projet, taches=taches)
 
 
-@app.route('/tache/<int:id>', methods=['GET', 'POST'])
-def tache(id):
+@app.route('/projet/<int:projid>/tache/<int:tacheid>', methods=['GET', 'POST'])
+def tache(projid, tacheid):
+    print(id)
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Projet_proj WHERE proj_id = ?", (id,))
+    cursor.execute("SELECT * FROM Projet_proj WHERE proj_id = ?", (projid,))
     projet = cursor.fetchone()
 
 
     # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
-    cursor.execute("SELECT * FROM Tache_tch WHERE tch_proj_id = ?", (id,))
+    cursor.execute("SELECT * FROM Tache_tch WHERE tch_proj_id = ?", (projid,))
     taches = cursor.fetchall()
 
     conn.close()
@@ -205,8 +206,6 @@ def add_tache():
     proj_id = data.get('projid')
 
     if name and start and end:
-        # Connexion à SQLite (ou une autre base de données)
-        ######################################AJOUT AVEC PROJET ID##################################
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
