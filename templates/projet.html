@@ -72,7 +72,7 @@
 
         <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
           <!-- Nom tâche -->
-          <a href="{{ url_for('tache', id=projet[0]) }}">
+          <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
             <p>{{ tache[3] }}</p>
           </a>
           <p>Début: {{ tache[4] }}</p>
