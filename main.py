@@ -65,11 +65,12 @@ def get_projets():
     return projets
 
 def get_projet_by_id(proj_id):
-    conn = sqlite3.connect(DB)  # Connect to the DB
-    cursor = conn.cursor()
+    conn1 = sqlite3.connect(DB)  # Connect to the DB
+    cursor1 = conn1.cursor()
 
-    query = f'''
-    SELECT Projet_proj.proj_id AS id, 
+    query = """
+    SELECT 
+        Projet_proj.proj_id AS id, 
         Projet_proj.proj_clnt_id AS idClient, 
         Projet_proj.proj_etat_etat AS etatProjet, 
         Projet_proj.proj_emp_id AS idChef, 
@@ -81,15 +82,38 @@ def get_projet_by_id(proj_id):
     FROM Projet_proj
     LEFT JOIN Client_clnt ON Projet_proj.proj_clnt_id = Client_clnt.clnt_id
     LEFT JOIN Employee_emp ON Projet_proj.proj_emp_id = Employee_emp.emp_id
-    WHERE Projet_proj.proj_id = {proj_id};  # Filter by proj_id
-    '''
+    WHERE Projet_proj.proj_id = ?;
+    """
     
-    # Execute the query with the provided proj_id as parameter
-    cursor.execute(query)  
-    projet = cursor.fetchone()  # Fetch a single result since we expect one project
-    conn.close()
+    # Use a parameterized query to execute
+    cursor1.execute(query, (proj_id,))  
+    projet = cursor1.fetchone()  # Fetch a single result
+    conn1.close()
     
     return projet
+
+def get_taches_by_project(proj_id):
+    conn = sqlite3.connect(DB)  # Connect to the database
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 
+        Tache_tch.tch_id AS id, 
+        Tache_tch.tch_proj_id AS projet_id, 
+        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Tache_tch.tch_nom AS nom, 
+        Tache_tch.tch_dateDebut AS dateDebut, 
+        Tache_tch.tch_dateFin AS dateFin
+    FROM Tache_tch
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    WHERE Tache_tch.tch_proj_id = ?;
+    """
+    cursor.execute(query, (proj_id,))
+    taches = cursor.fetchall()
+    conn.close()
+    
+    return taches
+
 
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -175,13 +199,7 @@ def projet(id):
     if projet is None:
         return "Project not found", 404  # Or render a custom 404 page
     
-    conn = get_db()
-    cursor = conn.cursor()
-    # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
-    cursor.execute("SELECT * FROM Tache_tch WHERE tch_proj_id = ?", (id,))
-    taches = cursor.fetchall()
-
-    conn.close()
+    taches = get_taches_by_project(id)
 
     # Rendre la page avec les détails du projet
     return render_template('projet.html', projet=projet, taches=taches)

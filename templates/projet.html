@@ -36,8 +36,8 @@
     <h4 class="taches">TÂCHES</h4>
     <div class="project-details">
       <div class="part1">
-        <p>Gestionnaire: {{ projet[3] }}</p>
-        <p>Client: {{ projet[1] }}</p>
+        <p>Gestionnaire: {{ projet[8] }}</p>
+        <p>Client: {{ projet[7] }}</p>
       </div>
       <div class="part2">
         <label for="status">Statut:</label>
@@ -73,10 +73,10 @@
         <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
           <!-- Nom tâche -->
           <a href="{{ url_for('tache', id=projet[0]) }}">
-            <p>{{ tache[4] }}</p>
+            <p>{{ tache[3] }}</p>
           </a>
-          <p>Début: {{ tache[5] }}</p>
-          <p>Fin: {{ tache[6] }}</p>
+          <p>Début: {{ tache[4] }}</p>
+          <p>Fin: {{ tache[5] }}</p>
           <p>Statut: {{ tache[2] }}</p>
           <div class="icons">👤👤👤</div>
           <button
