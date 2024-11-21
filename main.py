@@ -122,6 +122,28 @@ def get_taches_by_project(proj_id):
     
     return taches
 
+def get_tache_by_id(task_id):
+    conn = sqlite3.connect(DB)  # Connect to the database
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 
+        Tache_tch.tch_id AS id, 
+        Tache_tch.tch_proj_id AS projet_id, 
+        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Tache_tch.tch_nom AS nom, 
+        Tache_tch.tch_dateDebut AS dateDebut, 
+        Tache_tch.tch_dateFin AS dateFin
+    FROM Tache_tch
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    WHERE Tache_tch.tch_id = ?;  -- Only filter by task_id
+    """
+    cursor.execute(query, (task_id,))
+    tache = cursor.fetchone()
+    conn.close()
+    
+    return tache
+
 
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -202,12 +224,6 @@ def employes():
     listeEmploye = get_employes()
     return render_template('employes.html', employes=listeEmploye)
 
-
-
-
-
-
-
 @app.route('/projet/<int:id>', methods=['GET'])
 def projet(id):
 
@@ -221,20 +237,17 @@ def projet(id):
     return render_template('projet.html', projet=projet, taches=taches)
 
 
-@app.route('/projet/<int:projid>/tache/<int:tacheid>', methods=['GET', 'POST'])
-def tache(projid, tacheid):
-    print(id)
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Projet_proj WHERE proj_id = ?", (projid,))
-    projet = cursor.fetchone()
 
+@app.route('/projet/<int:proj_id>/tache/<int:task_id>', methods=['GET', 'POST'])
+def tache(proj_id, task_id):
+    projet = get_projet_by_id(proj_id)
+    if projet is None:
+        return "Project not found", 404  # Or render a custom 404 page
 
-    # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
-    cursor.execute("SELECT * FROM Tache_tch WHERE tch_proj_id = ?", (projid,))
-    taches = cursor.fetchall()
+    taches = get_tache_by_id(task_id)
+    if tache is None:
+        return "Task not found", 404  # Or render a custom 404 page
 
-    conn.close()
     return render_template('Taches.html', projet=projet, taches=taches)
 
 @app.route('/add_tache', methods=['POST'])
