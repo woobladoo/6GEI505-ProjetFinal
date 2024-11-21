@@ -16,7 +16,9 @@
     <div class="header">
       <h4>PROJET 1: Développement Gestionnaire de Projet et de Temps</h4>
       <div class="menu">
-        <a href="{{ url_for('projet') }}" class="highlight-link">Retour</a>
+        <a href="{{ url_for('projet', id=projet[0]) }}" class="highlight-link"
+          >Retour</a
+        >
         <a href="{{ url_for('listeProjets') }}" class="highlight-link"
           >Projets</a
         >

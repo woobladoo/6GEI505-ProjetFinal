@@ -14,21 +14,30 @@
   </head>
   <body>
     <div class="header">
-      <h4>PROJET 1: Développement Gestionnaire de Projet et de Temps</h4>
+      <h4>{{ projet[4] }}</h4>
       <div class="menu">
-        <a href="{{ url_for('listeProjets') }}" class="highlight-link">Projets</a>
+        <a href="{{ url_for('listeProjets') }}" class="highlight-link"
+          >Projets</a
+        >
         <a href="{{ url_for('profil') }}" class="highlight-link">Profil</a>
         <a href="#" class="user-icon">
-          <img src="../static/images/icon_utiliateur.jpg" alt="User Icon" width="40" height="40"/>
+          <img
+            src="../static/images/icon_utiliateur.jpg"
+            alt="User Icon"
+            width="40"
+            height="40"
+          />
         </a>
       </div>
     </div>
+
     <div class="divider"></div>
+
     <h4 class="taches">TÂCHES</h4>
     <div class="project-details">
       <div class="part1">
-        <p>Gestionnaire: Mayatta Ndiaye</p>
-        <p>Client: Mikael Brassard</p>
+        <p>Gestionnaire: {{ projet[3] }}</p>
+        <p>Client: {{ projet[1] }}</p>
       </div>
       <div class="part2">
         <label for="status">Statut:</label>
@@ -39,8 +48,8 @@
         </select>
       </div>
       <div class="part3">
-        <p>Début: 24-10-2024</p>
-        <p>Fin: 17-12-2024</p>
+        <p>Début: {{ projet[5] }}</p>
+        <p>Fin: {{ projet[6] }}</p>
       </div>
     </div>
     <div class="task-status">
@@ -50,44 +59,50 @@
     </div>
 
     <div class="tasks-container row">
-      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <div
+        class="column col-12 col-md-4"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
         <button class="add-button" onclick="showTaskForm()">+</button>
-        <div id="task-form-container" style="display: none;"></div>
+        <div id="task-form-container" style="display: none"></div>
+
+        <!-- Affichage dynamique des taches -->
+        {% for tache in taches %}
 
         <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
-          <p>Créer serveur flask</p>
-          <p>Début: 24-10-2024</p>
-          <p>Fin: 17-12-2024</p>
-          <p>Statut:</p>
+          <!-- Nom tâche -->
+          <a href="{{ url_for('tache', id=tache[0]) }}">
+            <p>{{ tache[4] }}</p>
+          </a>
+          <p>Début: {{ tache[5] }}</p>
+          <p>Fin: {{ tache[6] }}</p>
+          <p>Statut: {{ tache[2] }}</p>
           <div class="icons">👤👤👤</div>
-          <button class="delete-button" onclick="deleteTask('task1')">🗑️</button>
+          <button
+            class="delete-button"
+            onclick="deleteTask('tache-{{ tache[0] }}')"
+          >
+            🗑️
+          </button>
         </div>
-        <div class="task" id="task2" draggable="true" ondragstart="drag(event)">
-          <p>Faire code javascript</p>
-          <p>Début: 24-10-2024</p>
-          <p>Fin: 17-12-2024</p>
-          <p>Statut:</p>
-          <div class="icons">👤👤👤</div>
-          <button class="delete-button" onclick="deleteTask('task2')">🗑️</button>
 
-        </div>
+        {% endfor %}
       </div>
 
-      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <div
+        class="column col-12 col-md-4"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
         <button class="add-button" onclick="showTaskForm()">+</button>
-
-        <div class="task" id="task3" draggable="true" ondragstart="drag(event)">
-          <p>Revu de l'état de l'art</p>
-          <p>Début: 24-10-2024</p>
-          <p>Fin: 17-12-2024</p>
-          <p>Statut:</p>
-          <div class="icons">👤👤👤</div>
-          <button class="delete-button" onclick="deleteTask('task3')">🗑️</button>
-
-        </div>
       </div>
 
-      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <div
+        class="column col-12 col-md-4"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
         <button class="add-button" onclick="showTaskForm()">+</button>
       </div>
     </div>
@@ -110,7 +125,6 @@
         var draggedElement = document.getElementById(data); // Récupère l'élément dragué
         ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
       }
-
     </script>
 
     <script>
@@ -125,13 +139,13 @@
               <h5>Ajouter une Tâche</h5>
               <label for="task-name">Nom de la tâche:</label>
               <input type="text" id="task-name" class="form-control" required />
-              
+
               <label for="task-start">Début:</label>
               <input type="date" id="task-start" class="form-control" required />
-              
+
               <label for="task-end">Fin:</label>
               <input type="date" id="task-end" class="form-control" required />
-              
+
               <button onclick="addTask()" class="btn btn-primary mt-3">Ajouter</button>
               <button onclick="hideTaskForm()" class="btn btn-secondary mt-3">Annuler</button>
             </div>
@@ -154,15 +168,17 @@
         const end = document.getElementById("task-end").value;
         const parentTaskId = document.getElementById("task-parent").value;
 
-
         if (name && start && end) {
           // Créez un nouvel élément de tâche
-          const taskContainer = document.querySelector(".column.col-12.col-md-4");
+          const taskContainer = document.querySelector(
+            ".column.col-12.col-md-4"
+          );
           const newTask = document.createElement("div");
           newTask.className = "task";
           newTask.id = `task-${Date.now()}`;
           newTask.draggable = true;
           newTask.ondragstart = drag;
+
           newTask.innerHTML = `
             <p>${name}</p>
             <p>Début: ${start}</p>
@@ -192,14 +208,16 @@
       }
 
       // Ajoutez le bouton de suppression lors de la création d'une tâche dynamique
-      function addTask() {
+      async function addTask() {
         const name = document.getElementById("task-name").value;
         const start = document.getElementById("task-start").value;
         const end = document.getElementById("task-end").value;
 
         if (name && start && end) {
           // Créez un nouvel élément de tâche
-          const taskContainer = document.querySelector(".column.col-12.col-md-4");
+          const taskContainer = document.querySelector(
+            ".column.col-12.col-md-4"
+          );
           const newTask = document.createElement("div");
           const taskId = `task-${Date.now()}`;
           newTask.className = "task";
@@ -220,12 +238,28 @@
 
           // Cachez le formulaire
           hideTaskForm();
+
+          // Enregistrez les détails dans la base de données
+          try {
+            const response = await fetch("/add_tache", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, start, end }),
+            });
+            if (!response.ok) {
+              throw new Error("Erreur lors de l’ajout à la base de données.");
+            }
+            const data = await response.json();
+            console.log(data.message); // Message de confirmation
+          } catch (error) {
+            console.error(error.message);
+            alert("Une erreur est survenue lors de l’ajout de la tâche.");
+          }
         } else {
           alert("Veuillez remplir tous les champs!");
         }
       }
     </script>
-
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

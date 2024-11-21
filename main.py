@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for, redirect, render_template, session, flash ##import de la classe flask et de certaines fonctions utiles
+from flask import Flask, request, url_for, redirect, render_template, session, flash, jsonify ##import de la classe flask et de certaines fonctions utiles
 from datetime import date
 import sqlite3
 
@@ -125,13 +125,64 @@ def employes():
     listeEmploye = get_employes()
     return render_template('employes.html', employes=listeEmploye)
 
-@app.route('/projet', methods=['GET', 'POST'])
-def projet():
-    return render_template('projet.html')
+@app.route('/projet/<int:id>', methods=['GET'])
+def projet(id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Projet WHERE id = ?", (id,))
+    projet = cursor.fetchone()
+    
 
-@app.route('/tache', methods=['GET', 'POST'])
-def tache():
-    return render_template('taches.html')
+     # Vérifiez si le projet existe
+    if not projet:
+        conn.close()
+        return "Projet non trouvé", 404
+    
+    # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
+    cursor.execute("SELECT * FROM Tache WHERE idProjet = ?", (id,))
+    taches = cursor.fetchall()
+
+    conn.close()
+
+    # Rendre la page avec les détails du projet
+    return render_template('projet.html', projet=projet, taches=taches)
+
+
+@app.route('/tache/<int:id>', methods=['GET', 'POST'])
+def tache(id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Projet WHERE id = ?", (id,))
+    projet = cursor.fetchone()
+
+
+    # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
+    cursor.execute("SELECT * FROM Tache WHERE idProjet = ?", (id,))
+    taches = cursor.fetchall()
+
+    conn.close()
+    return render_template('Taches.html', projet=projet, taches=taches)
+
+@app.route('/add_tache', methods=['POST'])
+def add_tache():
+    data = request.json
+    name = data.get('name')
+    start = data.get('start')
+    end = data.get('end')
+
+    if name and start and end:
+        # Connexion à SQLite (ou une autre base de données)
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Tache (nom, dateDebut, dateFin)
+            VALUES (?, ?, ?)
+        """, (name, start, end))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Tâche ajoutée avec succès!"}), 201
+
+    return jsonify({"error": "Données incomplètes"}), 400
 
 @app.route('/add_projet', methods=['GET', 'POST'])
 def add_projet():
