@@ -237,6 +237,7 @@ def projet(id):
     return render_template('projet.html', projet=projet, taches=taches)
 
 
+
 @app.route('/projet/<int:proj_id>/tache/<int:task_id>', methods=['GET', 'POST'])
 def tache(proj_id, task_id):
     projet = get_projet_by_id(proj_id)
@@ -259,8 +260,6 @@ def add_tache():
     proj_id = data.get('projid')
 
     if name and start and end:
-        # Connexion à SQLite (ou une autre base de données)
-        ######################################AJOUT AVEC PROJET ID##################################
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
