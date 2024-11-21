@@ -57,12 +57,39 @@ def get_projets():
     FROM Projet_proj
     LEFT JOIN Client_clnt ON Projet_proj.proj_clnt_id = Client_clnt.clnt_id
     LEFT JOIN Employee_emp ON Projet_proj.proj_emp_id = Employee_emp.emp_id;
-
+    
     '''
     cursor.execute(query) #Cherche tous les projets dans la table projet
     projets = cursor.fetchall()
     conn.close()
     return projets
+
+def get_projet_by_id(proj_id):
+    conn = sqlite3.connect(DB)  # Connect to the DB
+    cursor = conn.cursor()
+
+    query = f'''
+    SELECT Projet_proj.proj_id AS id, 
+        Projet_proj.proj_clnt_id AS idClient, 
+        Projet_proj.proj_etat_etat AS etatProjet, 
+        Projet_proj.proj_emp_id AS idChef, 
+        Projet_proj.proj_nom AS nom, 
+        Projet_proj.proj_dateDebut AS dateDebut, 
+        Projet_proj.proj_dateFin AS dateFin, 
+        Client_clnt.clnt_prenom || ' ' || Client_clnt.clnt_nom AS client_name, 
+        Employee_emp.emp_prenom || ' ' || Employee_emp.emp_nom AS manager_name
+    FROM Projet_proj
+    LEFT JOIN Client_clnt ON Projet_proj.proj_clnt_id = Client_clnt.clnt_id
+    LEFT JOIN Employee_emp ON Projet_proj.proj_emp_id = Employee_emp.emp_id
+    WHERE Projet_proj.proj_id = {proj_id};  # Filter by proj_id
+    '''
+    
+    # Execute the query with the provided proj_id as parameter
+    cursor.execute(query)  
+    projet = cursor.fetchone()  # Fetch a single result since we expect one project
+    conn.close()
+    
+    return projet
 
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -143,17 +170,13 @@ def employes():
 
 @app.route('/projet/<int:id>', methods=['GET'])
 def projet(id):
+
+    projet = get_projet_by_id(id)
+    if projet is None:
+        return "Project not found", 404  # Or render a custom 404 page
+    
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Projet_proj WHERE proj_id = ?", (id,))
-    projet = cursor.fetchone()
-    
-
-     # Vérifiez si le projet existe
-    if not projet:
-        conn.close()
-        return "Projet non trouvé", 404
-    
     # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
     cursor.execute("SELECT * FROM Tache_tch WHERE tch_proj_id = ?", (id,))
     taches = cursor.fetchall()
@@ -172,7 +195,7 @@ def tache(id):
     projet = cursor.fetchone()
 
 
-    # Fetch tasks related to the project (assuming you have a Task table with project_id as a foreign key)
+    # Fetch tasks related to the project
     cursor.execute("SELECT * FROM Tache_tch WHERE tch_proj_id = ?", (id,))
     taches = cursor.fetchall()
 

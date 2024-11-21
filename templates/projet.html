@@ -72,7 +72,7 @@
 
         <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
           <!-- Nom tâche -->
-          <a href="{{ url_for('tache', id=tache[0]) }}">
+          <a href="{{ url_for('tache', id=projet[0]) }}">
             <p>{{ tache[4] }}</p>
           </a>
           <p>Début: {{ tache[5] }}</p>
@@ -81,7 +81,7 @@
           <div class="icons">👤👤👤</div>
           <button
             class="delete-button"
-            onclick="deleteTask('tache-{{ tache[0] }}')"
+            onclick="deleteTask('task{{ tache[0] }}')"
           >
             🗑️
           </button>
