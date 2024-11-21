@@ -32,6 +32,14 @@ def get_user_role(username):
     conn.close()
     return role[0] if role else None
 
+def get_user(username):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Employee_emp WHERE emp_courriel = ?;", (username,))  # Adjust columns as needed
+    user = cursor.fetchall()
+    conn.close()
+    return user
+
 def get_employes():
     conn = get_db()
     cursor = conn.cursor()
@@ -134,12 +142,21 @@ def logout():
 
 @app.route('/profil', methods=['GET', 'POST'])
 def profil():
-    return render_template('profil.html')
+    courriel = session.get('username')
+    user = get_user(courriel)
+    print(user)
+    return render_template('profil.html', user=user)
 
 @app.route('/employes', methods=['GET', 'POST'])
 def employes():
     listeEmploye = get_employes()
     return render_template('employes.html', employes=listeEmploye)
+
+
+
+
+
+
 
 @app.route('/projet/<int:id>', methods=['GET'])
 def projet(id):
