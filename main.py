@@ -206,6 +206,7 @@ def add_tache():
 
     if name and start and end:
         # Connexion à SQLite (ou une autre base de données)
+        ######################################AJOUT AVEC PROJET ID##################################
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
@@ -214,7 +215,7 @@ def add_tache():
         """, (name, start, end, proj_id))
         conn.commit()
         conn.close()
-        return redirect(url_for('listeProjets'))
+        return jsonify({"message": "Tâche ajoutée avec succès!"}), 201
 
     return jsonify({"error": "Données incomplètes"}), 400
 
