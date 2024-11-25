@@ -70,7 +70,7 @@
         <!-- Affichage dynamique des taches -->
         {% for tache in taches %}
 
-        <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
+        <div class="task" id="task{{ tache[0] }}" draggable="true" ondragstart="drag(event)">
           <!-- Nom tâche -->
           <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
             <p>{{ tache[3] }}</p>
@@ -110,6 +110,10 @@
       // Fonction pour commencer à draguer l'élément
       function drag(ev) {
         ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
+
+        if (ev.target.classList.contains("task")) {
+          ev.dataTransfer.setData("text", ev.target.id);
+        }
       }
 
       // Fonction pour gérer le dépôt de l'élément
@@ -118,6 +122,11 @@
         var data = ev.dataTransfer.getData("text");
         var draggedElement = document.getElementById(data); // Récupère l'élément dragué
         ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+
+       // Vérifiez que la cible est une zone valide (par exemple, une colonne)
+        if (ev.target.classList.contains("column")) {
+          ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+        }
       }
     </script>
 
@@ -158,40 +167,40 @@
 
       // Fonction pour ajouter une tâche
       function addTask() {
-        const projid = document.getElementById("task-project").value;
-        const name = document.getElementById("task-name").value;
-        const start = document.getElementById("task-start").value;
-        const end = document.getElementById("task-end").value;
-        const parentTaskId = document.getElementById("task-parent").value;
+      const projid = document.getElementById("task-project").value;
+      const name = document.getElementById("task-name").value;
+      const start = document.getElementById("task-start").value;
+      const end = document.getElementById("task-end").value;
 
-        if (name && start && end) {
-          // Créez un nouvel élément de tâche
-          const taskContainer = document.querySelector(
-            ".column.col-12.col-md-4"
-          );
-          const newTask = document.createElement("div");
-          newTask.className = "task";
-          newTask.id = `task-${Date.now()}`;
-          newTask.draggable = true;
-          newTask.ondragstart = drag;
+      if (name && start && end) {
+        // Créez un nouvel élément de tâche
+        const taskContainer = document.querySelector(".column.col-12.col-md-4");
+        const newTask = document.createElement("div");
+        const taskId = `task-${Date.now()}`;
+        newTask.className = "task";
+        newTask.id = taskId;
+        newTask.draggable = true;
+        newTask.ondragstart = drag;
 
-          newTask.innerHTML = `
-            <p>${name}</p>
-            <p>Début: ${start}</p>
-            <p>Fin: ${end}</p>
-            <p>Statut:</p>
-            <div class="icons">👤👤👤</div>
-          `;
+        newTask.innerHTML = `
+          <p>${name}</p>
+          <p>Début: ${start}</p>
+          <p>Fin: ${end}</p>
+          <p>Statut:</p>
+          <div class="icons">👤👤👤</div>
+          <button class="delete-button" onclick="deleteTask('${taskId}')">🗑️</button>
+        `;
 
-          // Ajoutez la tâche à la colonne "À FAIRE"
-          taskContainer.appendChild(newTask);
+        // Ajoutez la tâche à la colonne "À FAIRE"
+        taskContainer.appendChild(newTask);
 
-          // Cachez le formulaire
-          hideTaskForm();
-        } else {
-          alert("Veuillez remplir tous les champs!");
-        }
+        // Cachez le formulaire
+        hideTaskForm();
+      } else {
+        alert("Veuillez remplir tous les champs!");
       }
+    }
+
     </script>
 
     <script>
