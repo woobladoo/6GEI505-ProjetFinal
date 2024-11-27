@@ -1,4 +1,2 @@
 -- SQLite
-UPDATE EmployeeTache_emptch
-SET emptch_emp_id = 4
-WHERE emptch_emp_id = 3;
+DELETE FROM Tache_tch WHERE tch_id = 12;

@@ -104,9 +104,9 @@ h4.description {
 .project-details {
   top: 20px;
   right: 20px;
-  width: 90%;
+  width: 100%;
   margin-right: 10px;
-  max-width: 600px;
+  max-width: 700px;
   background-color: #f0f0f0;
   border: 2px solid #0f0f0f;
   border-radius: 8px;

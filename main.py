@@ -118,9 +118,31 @@ def get_taches_by_project(proj_id):
         Tache_tch.tch_dateFin AS dateFin
     FROM Tache_tch
     LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
-    WHERE Tache_tch.tch_proj_id = ?;
+    WHERE Tache_tch.tch_proj_id = ? AND Tache_tch.tch_parent IS NULL;
     """
     cursor.execute(query, (proj_id,))
+    taches = cursor.fetchall()
+    conn.close()
+    
+    return taches
+
+def get_soustaches_by_tache(task_id):
+    conn = sqlite3.connect(DB)  # Connect to the database
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 
+        Tache_tch.tch_id AS id, 
+        Tache_tch.tch_proj_id AS projet_id, 
+        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Tache_tch.tch_nom AS nom, 
+        Tache_tch.tch_dateDebut AS dateDebut, 
+        Tache_tch.tch_dateFin AS dateFin
+    FROM Tache_tch
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    WHERE Tache_tch.tch_parent = ?
+    """
+    cursor.execute(query, (task_id,))
     taches = cursor.fetchall()
     conn.close()
     
@@ -273,9 +295,11 @@ def tache(proj_id, task_id):
     if tache is None:
         return "Task not found", 404  # Or render a custom 404 page
     
+    sousTaches = get_soustaches_by_tache(task_id)
+    
     print("Taches data:", tache)  # Debug print to see the data structure
 
-    return render_template('Taches.html', projet=projet, tache=tache)
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
@@ -285,14 +309,15 @@ def add_tache():
     start = data.get('start')
     end = data.get('end')
     proj_id = data.get('projid')
+    parent_id = data.get('parentid')
 
     if name and start and end:
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin, tch_proj_id, tch_etat_etat)
-            VALUES (?, ?, ?, ?, 1)
-        """, (name, start, end, proj_id))
+            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin, tch_proj_id, tch_parent, tch_etat_etat)
+            VALUES (?, ?, ?, ?, ?, 1)
+        """, (name, start, end, proj_id, parent_id))
         conn.commit()
         conn.close()
         return jsonify({"message": "Tâche ajoutée avec succès!"}), 201
