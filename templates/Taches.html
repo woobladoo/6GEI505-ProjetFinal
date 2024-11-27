@@ -29,82 +29,165 @@
         <a href="{{ url_for('profil') }}" class="highlight-link">Profil</a>
         <a href="#" class="user-icon">
           <img
-            src="../static/images/icon_utiliateur.jpg"
+            src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}"
             alt="User Icon"
             width="40"
             height="40"
         /></a>
       </div>
     </div>
-    <div class="divider"></div>
-
-    <h4 class="taches">
-      {{ taches[1] }}
-      <form method="POST" action="{{ url_for('delete_tache', projid=projet[0], tacheid=taches[0]) }}">
-        <button type="submit" class="button">Delete Task</button>
-    </form>
     
-    </h4>
-
-    <div class="project-details">
-      <div class="part3">
-        <p>Début: {{ taches[5] }}</p>
-        <p>Fin: {{ taches[6] }}</p>
+    <div class="divider"></div>
+    <div class="container-fluid d-flex justify-content-between">
+      <div class="tache-titre" style="padding-right: 20px;">
+        <div class="d-flex align-items-center">
+          <h4 class="mb-0 me-2" style="font-size: 35px;">{{ tache[3] }}</h4> <!-- Task title -->
+          <form method="POST" action="{{ url_for('delete_tache', projid=projet[0], tacheid=tache[0]) }}" class="mb-0">
+            <button type="submit" class="btn btn-danger">Delete Task</button>
+          </form>
+        </div>
+      </div>
+    
+      <div class="project-details gap-4">
+        <div class="part3">
+          <p>Début: {{ tache[4] }}</p>
+          <p>Fin: {{ tache[5] }}</p>
+        </div>
+    
+        <div class="column2">
+          <button type="button" class="btn btn-primary">
+            Ajouter employé
+          </button>
+          <button type="button" class="btn btn-light">
+            Modifier statut
+          </button>
+        </div>
       </div>
     </div>
-    <h6 class="A_faire">Description</h6>
-    <h4 class="en_cours">Équipe sur la Tâche</h4>
+    
+    
+    
+    
 
-    <div class="tasks-container">
+    <h4 class="description">Description</h4>   
+
+    
       <div class="column">
         <p style="font-size: 12px">
           Cette tâche consiste à faire des recherches sur les différentes
           fonctionnalités qu'on utilise
         </p>
       </div>
-      <div class="column1">
-        <p>
-          <a href="#" class="user-icon">
-            <img
-              src="../static/images/icon_utiliateur.jpg"
-              alt="User Icon"
-              width="40"
-              height="40"
-          /></a>
-          Mayatta Ndiaye
-        </p>
-        <p>
-          <a href="#" class="user-icon">
-            <img
-              src="../static/images/icon_utiliateur.jpg"
-              alt="User Icon"
-              width="40"
-              height="40"
-          /></a>
-          Antoine Methot
-        </p>
-        <p>
-          <a href="#" class="user-icon">
-            <img
-              src="../static/images/icon_utiliateur.jpg"
-              alt="User Icon"
-              width="40"
-              height="40"
-          /></a>
-          Maxime Simard
-        </p>
-        <h4 class="sous_taches">Sous-Tâches</h4>
+      
+      <div class="equipe">
+        <h4>Équipe sur la tâche</h4>
+        {% if tache and tache['employes'] %}
+          {% for employe in tache['employes'] %}
+            <p>
+              <a href="#" class="user-icon">
+                <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
+              </a>
+              {{ employe }}
+            </p>
+          {% endfor %}
+        {% else %}
+          <p>Aucun employé n'est assigné à cette tâche.</p>
+        {% endif %}
       </div>
+      
+      
+      
 
-      <div class="column2">
-        <button type="button" class="btn btn-outline-primary">
-          Ajouter employé
-        </button>
-        <button type="button" class="btn btn-outline-primary">
-          Modifier statut
-        </button>
       </div>
-    </div>
+        
+        </p>
+        <h4 class="equipe">Sous-tâches</h4>
+
+        <div class="task-status">
+          <h4 class="A_faire">À FAIRE</h4>
+          <h4 class="en_cours">EN COURS</h4>
+          <h4 class="complete">COMPLÉTÉ</h4>
+        </div>
+
+        <div class="tasks-container row">
+          <div
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+            <button class="add-button" onclick="showTaskForm()">+</button>
+            <div id="task-form-container" style="display: none"></div>
+    
+            <!-- Affichage dynamique des taches -->
+            {% for tache in taches %}
+    
+            <div
+              class="task"
+              id="task{{ tache[0] }}"
+              draggable="true"
+              ondragstart="drag(event)"
+            >
+              <!-- Nom tâche -->
+              <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
+                <p>{{ tache[3] }}</p>
+              </a>
+              <p>Début: {{ tache[4] }}</p>
+              <p>Fin: {{ tache[5] }}</p>
+              <p>Statut: {{ tache[2] }}</p>
+              <div class="icons">👤👤👤</div>
+            </div>
+    
+            {% endfor %}
+          </div>
+    
+          <div
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+            <button class="add-button" onclick="showTaskForm()">+</button>
+          </div>
+    
+          <div
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+            <button class="add-button" onclick="showTaskForm()">+</button>
+          </div>
+        </div>
+        
+
+        <script>
+          // Fonction pour autoriser le dépôt
+          function allowDrop(ev) {
+            ev.preventDefault(); // Permet de déposer l'élément
+          }
+    
+          // Fonction pour commencer à draguer l'élément
+          function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
+    
+            if (ev.target.classList.contains("task")) {
+              ev.dataTransfer.setData("text", ev.target.id);
+            }
+          }
+    
+          // Fonction pour gérer le dépôt de l'élément
+          function drop(ev) {
+            ev.preventDefault(); // Empêche l'action par défaut
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data); // Récupère l'élément dragué
+            ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+    
+           // Vérifiez que la cible est une zone valide (par exemple, une colonne)
+            if (ev.target.classList.contains("column")) {
+              ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+            }
+          }
+        </script>
+     
+    
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

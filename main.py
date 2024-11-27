@@ -1,8 +1,12 @@
 from flask import Flask, request, url_for, redirect, render_template, session, flash, jsonify ##import de la classe flask et de certaines fonctions utiles
 from datetime import date
+from collections import namedtuple
 import sqlite3
 
 app = Flask(__name__,template_folder='templates', static_folder='static') ##Instanciation de la classe flask
+
+Tache = namedtuple('Tache', ['id', 'projet_id', 'statut', 'nom', 'dateDebut', 'dateFin', 'employes'])
+
 
 app.config['SECRET_KEY'] = 'gros secret'
 DB = 'DATA.db'
@@ -124,6 +128,7 @@ def get_taches_by_project(proj_id):
 
 def get_tache_by_id(task_id):
     conn = sqlite3.connect(DB)  # Connect to the database
+    conn.row_factory = sqlite3.Row  # Use Row factory to access columns by name
     cursor = conn.cursor()
     
     query = """
@@ -133,17 +138,37 @@ def get_tache_by_id(task_id):
         Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
         Tache_tch.tch_nom AS nom, 
         Tache_tch.tch_dateDebut AS dateDebut, 
-        Tache_tch.tch_dateFin AS dateFin
+        Tache_tch.tch_dateFin AS dateFin,
+        GROUP_CONCAT(Employee_emp.emp_prenom || ' ' || Employee_emp.emp_nom) AS employes  -- Combine first and last names
     FROM Tache_tch
     LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
-    WHERE Tache_tch.tch_id = ?;  -- Only filter by task_id
+    LEFT JOIN EmployeeTache_emptch ON Tache_tch.tch_id = EmployeeTache_emptch.emptch_tch_id  -- Join with EmployeeTache_emptch table
+    LEFT JOIN Employee_emp ON EmployeeTache_emptch.emptch_emp_id = Employee_emp.emp_id  -- Join with Employee_emp table
+    WHERE Tache_tch.tch_id = ?  -- Only filter by task_id
+    GROUP BY Tache_tch.tch_id;
     """
-    cursor.execute(query, (task_id,))
-    tache = cursor.fetchone()
-    conn.close()
     
-    return tache
+    cursor.execute(query, (task_id,))
+    row = cursor.fetchone()
+    conn.close()
 
+    if row:
+        # Convert Row object to a named tuple
+        employes = row['employes'].split(',') if row['employes'] else []
+        tache = Tache(
+            id=row['id'],
+            projet_id=row['projet_id'],
+            statut=row['statut'],
+            nom=row['nom'],
+            dateDebut=row['dateDebut'],
+            dateFin=row['dateFin'],
+            employes=employes
+        )
+    else:
+        tache = None  # Explicitly set to None if no task is found
+
+    print("Tache:", tache)
+    return tache
 
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -244,11 +269,13 @@ def tache(proj_id, task_id):
     if projet is None:
         return "Project not found", 404  # Or render a custom 404 page
 
-    taches = get_tache_by_id(task_id)
+    tache = get_tache_by_id(task_id)
     if tache is None:
         return "Task not found", 404  # Or render a custom 404 page
+    
+    print("Taches data:", tache)  # Debug print to see the data structure
 
-    return render_template('Taches.html', projet=projet, taches=taches)
+    return render_template('Taches.html', projet=projet, tache=tache)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
