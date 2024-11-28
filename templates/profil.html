@@ -35,10 +35,10 @@
 
           <label for="telephone">Telephone</label>
           <input type="tel" id="telephone" name="telephone" value="{{ user[0]['emp_telephone'] }}" />
-
+          {% if session.get('role') == 1 %}
           <label for="role">Rôle</label>
           <input type="text" id="role" name="role" value="{{ user[0]['emp_role_id'] }}"/>
-
+          {% endif %}
           <button type="submit" class="save-button">SAVE</button>
         </form>
       </div>

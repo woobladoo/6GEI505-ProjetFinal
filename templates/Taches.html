@@ -118,7 +118,9 @@
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-            <button class="add-button" onclick="showTaskForm()">+</button>
+          {% if session.get('role') == 1 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
             <div id="task-form-container" style="display: none"></div>
     
             <!-- Affichage dynamique des taches -->
@@ -148,7 +150,9 @@
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-            <button class="add-button" onclick="showTaskForm()">+</button>
+          {% if session.get('role') == 1 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
           </div>
     
           <div
@@ -156,7 +160,9 @@
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-            <button class="add-button" onclick="showTaskForm()">+</button>
+          {% if session.get('role') == 1 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
           </div>
         </div>
 
