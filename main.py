@@ -50,6 +50,7 @@ def get_employes():
     cursor.execute("SELECT emp_id AS id, emp_prenom AS prenom, emp_nom AS nom, emp_courriel AS courriel, emp_telephone AS telephone, emp_role_id AS idRole FROM Employee_emp;")  # Adjust columns as needed
     employes = cursor.fetchall()
     conn.close()
+    
     return employes
 
 def get_projets():
@@ -189,7 +190,7 @@ def get_tache_by_id(task_id):
     else:
         tache = None  # Explicitly set to None if no task is found
 
-    print("Tache:", tache)
+   
     return tache
 
 def get_clients():
@@ -206,7 +207,6 @@ def get_clients():
     '''
     cursor.execute(query)
     clients = cursor.fetchall()
-    print(clients)
     conn.close
     return clients
 
@@ -223,7 +223,7 @@ def get_gestionnaires():
     '''
     cursor.execute(query)
     gestionnaires = cursor.fetchall()
-    print(gestionnaires)
+    
     conn.close
     return gestionnaires
 
@@ -298,15 +298,14 @@ def tache(proj_id, task_id):
     sousTaches = get_soustaches_by_tache(task_id)
 
     listeEmploye = get_employes()
+    
 
-    print("Taches data:", tache)  # Debug print to see the data structure
 
-    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye)
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches, employes = listeEmploye)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
     data = request.json
-    print(data)
     name = data.get('name')
     start = data.get('start')
     end = data.get('end')
@@ -418,13 +417,7 @@ def update_profile():
     courriel = request.form['courriel']
     telephone = request.form['telephone']
     role = request.form['role']
-    print(user[0]['emp_id'])
-    print(prenom)
-    print(nom)
-    print(courriel)
-    print(telephone)
-    print(role)
-
+   
     conn = get_db()
     cursor = conn.cursor()
 
@@ -481,48 +474,84 @@ def inscription():
 
 @app.route('/add_employe_to_tache', methods=['POST'])
 def add_employe_to_tache():
-    try:
-        # Récupération des données envoyées par le client
-        data = request.get_json()
-        tache_id = data.get('tache_id')  # ID de la tâche
-        employe_id = data.get('employe_id')  # ID de l'employé à associer
-
-        # Validation des données
-        if not tache_id or not employe_id:
-            return jsonify({'message': 'Les champs tache_id et employe_id sont requis.'}), 400
-
-        # Connectez-vous à votre base de données (exemple SQLite)
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-
-        # Vérifier si la tâche existe
-        cursor.execute("SELECT tch_id FROM Tache_tch WHERE id = ?", (tache_id,))
-        tache = cursor.fetchone()
-        if not tache:
-            return jsonify({'message': 'Tâche non trouvée.'}), 404
-
-        # Vérifier si l'employé existe
-        cursor.execute("SELECT emp_id FROM Employee_emp WHERE id = ?", (employe_id,))
-        employe = cursor.fetchone()
-        if not employe:
-            return jsonify({'message': 'Employé non trouvé.'}), 404
-
-        # Ajouter la relation tâche-employé dans une table associée (exemple : `taches_employes`)
-        try:
-            # Insérer la relation tâche-employé dans la table
-            cursor.execute("""
-                INSERT INTO EmployeeTache_emptch (emptch_tch_id, emptch_emp_id)
-                VALUES (?, ?)
-            """, (tache_id, employe_id))
-            connection.commit()
-        except sqlite3.Error as e:
-            connection.close()
-            return jsonify({'message': f'Erreur SQL: {str(e)}'}), 500
+    
+    if request.method == 'POST':
+        # Récupération des données du formulaire
+       
+        tache_id = request.form['tache_id']
+        employe_id = request.form.get('employe_id')
+        projet_id = request.form['projet_id']
         
-        return jsonify({'message': 'Employé ajouté à la tâche avec succès.'}), 201
 
+        # Connexion à la base de données et ajout de l'utilisateur
+        conn = sqlite3.connect(DB)
+        cursor = conn.cursor()
+        
+
+        cursor.execute("""
+            SELECT 1 FROM EmployeeTache_emptch 
+            WHERE emptch_emp_id = ? AND emptch_tch_id = ?
+        """, (employe_id, tache_id))
+
+        existing_assignment = cursor.fetchone()
+        if existing_assignment:
+            # If the employee is already assigned to the task, flash a message
+            flash("Cet employé est déjà associé à cette tâche.", "error")
+            conn.close()
+            return redirect(url_for('tache', proj_id=projet_id, task_id=tache_id))
+        
+
+       
+        try:
+            query ='INSERT INTO EmployeeTache_emptch (emptch_emp_id, emptch_tch_id) VALUES (?, ?);'
+            cursor.execute(query, (employe_id, tache_id))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            flash("Cette personne est deja sur cette tache", "error")
+            return redirect(url_for('tache',proj_id = projet_id, task_id= tache_id, projet=projet, tache=tache))
+        finally:
+            conn.close()
+        
+
+        flash("Utilisateur ajouté avec succès", "success")
+        return redirect(url_for('tache',proj_id = projet_id, task_id= tache_id, projet=projet, tache=tache))
+
+    return render_template('taches.html',proj_id = projet_id, task_id= tache_id, projet=projet, tache=tache)
+
+@app.route('/delete_employee_tache', methods=['POST'])
+def delete_employee_tache():
+    # Récupérer les données du formulaire
+    employee_tache_id = request.form['employee_tache_id']
+    tache_id = request.form['tach']
+    projet_id = request.form['proj']
+    employee_tch = employee_tache_id.split(' ',1)[0]
+    # Affichage dans la console pour le débogage (optionnel)
+    print(f"Supprimer l'employé avec l'ID {employee_tch} de la tâche {tache_id}")
+
+    # Connexion à la base de données
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+
+    try:
+        # Exécuter la requête SQL pour supprimer l'employé de la tâche
+        query = 'DELETE FROM EmployeeTache_emptch WHERE emptch_emp_id = (Select emp_id from Employee_emp where emp_prenom = ?);'
+        cursor.execute(query, (employee_tch,))  # L'ID de l'employé et l'ID de la tâche
+        conn.commit()
+
+        # Message flash pour l'utilisateur (facultatif)
+        flash("Employé supprimé de la tâche avec succès.", "success")
+    
     except Exception as e:
-        return jsonify({'message': f'Erreur lors de l’ajout de l’employé : {str(e)}'}), 500
+        # Si une erreur survient, message d'erreur (facultatif)
+        flash("Erreur lors de la suppression de l'employé de la tâche.", "error")
+        print(f"Error: {e}")
+    
+    finally:
+        # Fermer la connexion à la base de données
+        conn.close()
+
+    # Rediriger l'utilisateur vers la page de la tâche ou autre page appropriée
+    return redirect(url_for('tache', proj_id=projet_id, task_id=tache_id))
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask

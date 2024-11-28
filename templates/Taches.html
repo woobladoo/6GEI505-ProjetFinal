@@ -85,20 +85,45 @@
       <div class="equipe">
         <h4>Équipe sur la tâche</h4>
         {% if tache and tache['employes'] %}
-          {% for employe in tache['employes'] %}
-            <p>
-              <a href="#" class="user-icon">
-                <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
-              </a>
-              {{ employe }}
-            </p>
-          {% endfor %}
+            {% for employe in tache['employes'] %}
+                <p>
+                    <a href="#" class="user-icon">
+                        <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
+                    </a>
+                    {{ employe }} <form action="/delete_employee_tache" method="POST" style="display:inline;">
+                      <!-- Champs cachés pour envoyer l'ID de l'employé, de la tâche et du projet -->
+                      <input type="hidden" name="employee_tache_id" value="{{ employe}}"> <!-- ID de l'employé -->
+                      <input type="hidden" name="tach" value="{{ tache[0] }}"> <!-- ID de la tâche -->
+                      <input type="hidden" name="proj" value="{{ projet[0] }}"> <!-- ID du projet -->
+                      
+                      <!-- Bouton poubelle pour supprimer l'employé -->
+                      <button type="submit" class="btn btn-danger">
+                          <i class="fas fa-trash"></i> Supprimer de la tâche
+                      </button>
+                  </form> <!-- Supposons que employe[1] est le prénom et employe[2] est le nom -->
+                    
+                    <!-- Formulaire pour supprimer un employé de la tâche -->
+                    
+                  
+                </p>
+            {% endfor %}
         {% else %}
-          <p>Aucun employé n'est assigné à cette tâche.</p>
+            <p>Aucun employé n'est assigné à cette tâche.</p>
         {% endif %}
-      </div>
+    </div>
+    
       
-      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+      {% endwith %}
       
 
       </div>
@@ -173,15 +198,18 @@
       <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
 
       <div id="add-employe-form" class="modal-custom">
-        <input type="hidden" id="tache-id" value="{{ tache[0] }}" />
-        <label for="employe-id">Employé :</label>
-        <select id="employe-id" class="form-control">
-          {% for employe in employes %}
-          <option value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
-          {% endfor %}
-        </select>
-        <button onclick="addEmployeToTache()" class="btn btn-success mt-2">Associer</button>
-        <button onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
+        <form action="/add_employe_to_tache" method="post">
+          <input type="hidden" name="tache_id" id="tache_id" value="{{ tache[0] }}" />
+          <input type="hidden" name="projet_id" id="projet_id" value="{{ projet[0] }}" />
+          <label for="employe_id">Employé :</label>
+          <select name= "employe_id" id="employe_id" class="form-control">
+            {% for employe in employes %}
+            <option  value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
+            {% endfor %}
+          </select>
+          <button onclick="hideAddEmployeForm" type="submit" class="btn btn-success mt-2">Associer</button>
+          <button  type="button"  onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
+        </form>
       </div>
 
 
@@ -198,36 +226,7 @@
             document.getElementById("add-employe-form").style.display = "none";
           }
 
-          // Fonction pour envoyer les données au backend (inchangée)
-          async function addEmployeToTache() {
-            const tacheId = document.getElementById("tache-id").value;
-            const employeId = document.getElementById("employe-id").value;
-
-            if (!tacheId || !employeId) {
-              alert("Veuillez sélectionner un employé.");
-              return;
-            }
-
-            try {
-              const response = await fetch("/add_employe_to_tache", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tache_id: tacheId, employe_id: employeId }),
-              });
-
-              if (!response.ok) {
-                throw new Error("Erreur lors de l’ajout de l’employé.");
-              }
-
-              const data = await response.json();
-              alert(data.message);
-              hideAddEmployeForm(); // Fermer le popup après succès
-              window.location.reload();
-            } catch (error) {
-              console.error(error.message);
-              alert("Une erreur est survenue.");
-            }
-          }
+          
 
         </script>
 
