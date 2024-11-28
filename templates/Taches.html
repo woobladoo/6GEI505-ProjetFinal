@@ -85,33 +85,29 @@
       <div class="equipe">
         <h4>Équipe sur la tâche</h4>
         {% if tache and tache['employes'] %}
-            {% for employe in tache['employes'] %}
-                <p>
-                    <a href="#" class="user-icon">
-                        <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
-                    </a>
-                    {{ employe }} <form action="/delete_employee_tache" method="POST" style="display:inline;">
-                      <!-- Champs cachés pour envoyer l'ID de l'employé, de la tâche et du projet -->
-                      <input type="hidden" name="employee_tache_id" value="{{ employe}}"> <!-- ID de l'employé -->
-                      <input type="hidden" name="tach" value="{{ tache[0] }}"> <!-- ID de la tâche -->
-                      <input type="hidden" name="proj" value="{{ projet[0] }}"> <!-- ID du projet -->
-                      
-                      <!-- Bouton poubelle pour supprimer l'employé -->
-                      <button type="submit" class="btn btn-danger">
-                          <i class="fas fa-trash"></i> Supprimer de la tâche
-                      </button>
-                  </form> <!-- Supposons que employe[1] est le prénom et employe[2] est le nom -->
-                    
-                    <!-- Formulaire pour supprimer un employé de la tâche -->
-                    
+          {% for employe in tache['employes'] %}
+            <p>
+              
+              <form action="/delete_employee_tache" method="POST" style="display:inline;"><!-- Champs cachés pour envoyer l'ID de l'employé, de la tâche et du projet -->
+                <a href="#" class="user-icon">
+                  <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
+                </a>
+                {{ employe }}
+                  <input type="hidden" name="employee_tache_id" value="{{ employe}}"> <!-- ID de l'employé -->
+                  <input type="hidden" name="tach" value="{{ tache[0] }}"> <!-- ID de la tâche -->
+                  <input type="hidden" name="proj" value="{{ projet[0] }}"> <!-- ID du projet -->
                   
-                </p>
-            {% endfor %}
+                  <!-- Bouton poubelle pour supprimer l'employé -->
+                  <button type="submit" class="btn btn-danger">
+                      <i class="fas fa-trash"></i> Supprimer de la tâche
+                  </button>
+              </form>
+            </p>
+          {% endfor %}
         {% else %}
-            <p>Aucun employé n'est assigné à cette tâche.</p>
+          <p>Aucun employé n'est assigné à cette tâche.</p>
         {% endif %}
-    </div>
-    
+      </div>
       
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
