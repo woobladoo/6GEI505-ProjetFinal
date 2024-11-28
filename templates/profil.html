@@ -35,13 +35,22 @@
 
           <label for="telephone">Telephone</label>
           <input type="tel" id="telephone" name="telephone" value="{{ user[0]['emp_telephone'] }}" />
-          {% if session.get('role') == 1 %}
+          {% if session.get('role') == 1 or session.get('role') == 2 %}
           <label for="role">Rôle</label>
           <input type="text" id="role" name="role" value="{{ user[0]['emp_role_id'] }}"/>
           {% endif %}
           <button type="submit" class="save-button">SAVE</button>
         </form>
       </div>
+
+      {% if session.get('role') == 1 or session.get('role') == 2 %}
+        <div class="additional-info">
+          <h2>Rôles:</h2>
+          <p>1 - Administrateur</p>
+          <p>2 - Chef de projet</p>
+          <p>3 - Employé</p>
+        </div>
+      {% endif %}
     </div>
   </body>
 </html>
