@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Projet 1: Gestionnaire de Projet et de Temps</title>
-    <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -14,21 +14,30 @@
   </head>
   <body>
     <div class="header">
-      <h4>PROJET 1: Développement Gestionnaire de Projet et de Temps</h4>
+      <h4>{{ projet[4] }}</h4>
       <div class="menu">
-        <a href="{{ url_for('listeProjets') }}" class="highlight-link">Projets</a>
+        <a href="{{ url_for('listeProjets') }}" class="highlight-link"
+          >Projets</a
+        >
         <a href="{{ url_for('profil') }}" class="highlight-link">Profil</a>
         <a href="#" class="user-icon">
-          <img src="../static/images/icon_utiliateur.jpg" alt="User Icon" width="40" height="40"/>
+          <img
+            src="../static/images/icon_utiliateur.jpg"
+            alt="User Icon"
+            width="40"
+            height="40"
+          />
         </a>
       </div>
     </div>
+
     <div class="divider"></div>
+
     <h4 class="taches">TÂCHES</h4>
     <div class="project-details">
       <div class="part1">
-        <p>Gestionnaire: Mayatta Ndiaye</p>
-        <p>Client: Mikael Brassard</p>
+        <p>Gestionnaire: {{ projet[8] }}</p>
+        <p>Client: {{ projet[7] }}</p>
       </div>
       <div class="part2">
         <label for="status">Statut:</label>
@@ -39,8 +48,8 @@
         </select>
       </div>
       <div class="part3">
-        <p>Début: 24-10-2024</p>
-        <p>Fin: 17-12-2024</p>
+        <p>Début: {{ projet[5] }}</p>
+        <p>Fin: {{ projet[6] }}</p>
       </div>
     </div>
     <div class="task-status">
@@ -50,39 +59,50 @@
     </div>
 
     <div class="tasks-container row">
-      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <button class="add-button" onclick="window.location.href='{{ url_for('tache') }}'">+</button>
-        
-        <div class="task" id="task1" draggable="true" ondragstart="drag(event)">
-          <p>Créer serveur flask</p>
-          <p>Début: 24-10-2024</p>
-          <p>Fin: 17-12-2024</p>
-          <p>Statut:</p>
+      <div
+        class="column col-12 col-md-4"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
+        <button class="add-button" onclick="showTaskForm()">+</button>
+        <div id="task-form-container" style="display: none"></div>
+
+        <!-- Affichage dynamique des taches -->
+        {% for tache in taches %}
+
+        <div
+          class="task"
+          id="task{{ tache[0] }}"
+          draggable="true"
+          ondragstart="drag(event)"
+        >
+          <!-- Nom tâche -->
+          <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
+            <p>{{ tache[3] }}</p>
+          </a>
+          <p>Début: {{ tache[4] }}</p>
+          <p>Fin: {{ tache[5] }}</p>
+          <p>Statut: {{ tache[2] }}</p>
           <div class="icons">👤👤👤</div>
         </div>
-        <div class="task" id="task2" draggable="true" ondragstart="drag(event)">
-          <p>Faire code javascript</p>
-          <p>Début: 24-10-2024</p>
-          <p>Fin: 17-12-2024</p>
-          <p>Statut:</p>
-          <div class="icons">👤👤👤</div>
-        </div>
+
+        {% endfor %}
       </div>
 
-      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <button class="add-button" onclick="window.location.href='{{ url_for('tache') }}'">+</button>
-
-        <div class="task" id="task3" draggable="true" ondragstart="drag(event)">
-          <p>Revu de l'état de l'art</p>
-          <p>Début: 24-10-2024</p>
-          <p>Fin: 17-12-2024</p>
-          <p>Statut:</p>
-          <div class="icons">👤👤👤</div>
-        </div>
+      <div
+        class="column col-12 col-md-4"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
+        <button class="add-button" onclick="showTaskForm()">+</button>
       </div>
 
-      <div class="column col-12 col-md-4" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <button class="add-button" onclick="window.location.href='{{ url_for('tache') }}'">+</button>
+      <div
+        class="column col-12 col-md-4"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
+        <button class="add-button" onclick="showTaskForm()">+</button>
       </div>
     </div>
 
@@ -95,6 +115,10 @@
       // Fonction pour commencer à draguer l'élément
       function drag(ev) {
         ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
+
+        if (ev.target.classList.contains("task")) {
+          ev.dataTransfer.setData("text", ev.target.id);
+        }
       }
 
       // Fonction pour gérer le dépôt de l'élément
@@ -103,6 +127,151 @@
         var data = ev.dataTransfer.getData("text");
         var draggedElement = document.getElementById(data); // Récupère l'élément dragué
         ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+
+        // Vérifiez que la cible est une zone valide (par exemple, une colonne)
+        if (ev.target.classList.contains("column")) {
+          ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+        }
+      }
+    </script>
+
+    <script>
+      // Fonction pour afficher le formulaire
+      function showTaskForm() {
+        const formContainer = document.getElementById("task-form-container");
+
+        // Créez le formulaire dynamique
+        formContainer.innerHTML = `
+          <div class="task-form-overlay">
+            <div class="task-form">
+              <h5>Ajouter une Tâche</h5>
+              <input type="hidden" id="task-project" class="form-control" value="{{ projet[0] }}" required />
+              <label for="task-name">Nom de la tâche:</label>
+              <input type="text" id="task-name" class="form-control" required />
+
+              <label for="task-start">Début:</label>
+              <input type="date" id="task-start" class="form-control" required />
+
+              <label for="task-end">Fin:</label>
+              <input type="date" id="task-end" class="form-control" required />
+
+              <button onclick="addTask()" class="btn btn-primary mt-3">Ajouter</button>
+              <button onclick="hideTaskForm()" class="btn btn-secondary mt-3">Annuler</button>
+            </div>
+          </div>
+        `;
+        formContainer.style.display = "block";
+      }
+
+      // Fonction pour cacher le formulaire
+      function hideTaskForm() {
+        const formContainer = document.getElementById("task-form-container");
+        formContainer.style.display = "none";
+        formContainer.innerHTML = "";
+      }
+
+      // Fonction pour ajouter une tâche
+      function addTask() {
+        const projid = document.getElementById("task-project").value;
+        const name = document.getElementById("task-name").value;
+        const start = document.getElementById("task-start").value;
+        const end = document.getElementById("task-end").value;
+
+        if (name && start && end) {
+          // Créez un nouvel élément de tâche
+          const taskContainer = document.querySelector(
+            ".column.col-12.col-md-4"
+          );
+          const newTask = document.createElement("div");
+          const taskId = `task-${Date.now()}`;
+          newTask.className = "task";
+          newTask.id = taskId;
+          newTask.draggable = true;
+          newTask.ondragstart = drag;
+
+          newTask.innerHTML = `
+          <p>${name}</p>
+          <p>Début: ${start}</p>
+          <p>Fin: ${end}</p>
+          <p>Statut:</p>
+          <div class="icons">👤👤👤</div>
+          <button class="delete-button" onclick="deleteTask('${taskId}')">🗑️</button>
+        `;
+
+          // Ajoutez la tâche à la colonne "À FAIRE"
+          taskContainer.appendChild(newTask);
+
+          // Cachez le formulaire
+          hideTaskForm();
+        } else {
+          alert("Veuillez remplir tous les champs!");
+        }
+      }
+    </script>
+
+    <script>
+      // Fonction pour supprimer une tâche
+      function deleteTask(taskId) {
+        const taskElement = document.getElementById(taskId);
+        console.log(taskId);
+        if (taskElement) {
+          taskElement.remove(); // Supprime l'élément du DOM
+        }
+      }
+
+      // Ajoutez le bouton de suppression lors de la création d'une tâche dynamique
+      async function addTask() {
+        const projid = document.getElementById("task-project").value;
+        const name = document.getElementById("task-name").value;
+        const start = document.getElementById("task-start").value;
+        const end = document.getElementById("task-end").value;
+
+        if (name && start && end) {
+          // Créez un nouvel élément de tâche
+          const taskContainer = document.querySelector(
+            ".column.col-12.col-md-4"
+          );
+          const newTask = document.createElement("div");
+          const taskId = `task-${Date.now()}`;
+          newTask.className = "task";
+          newTask.id = taskId;
+          newTask.draggable = true;
+          newTask.ondragstart = drag;
+          newTask.innerHTML = `
+            <p>${name}</p>
+            <p>Début: ${start}</p>
+            <p>Fin: ${end}</p>
+            <p>Statut:</p>
+            <div class="icons">👤👤👤</div>
+            <button class="delete-button" onclick="deleteTask('${taskId}')">🗑️</button>
+          `;
+
+          // Ajoutez la tâche à la colonne "À FAIRE"
+          taskContainer.appendChild(newTask);
+
+          // Cachez le formulaire
+          hideTaskForm();
+
+          // Enregistrez les détails dans la base de données
+          try {
+            const response = await fetch("/add_tache", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ projid, name, start, end }),
+            });
+            if (!response.ok) {
+              throw new Error("Erreur lors de l’ajout à la base de données.");
+            }
+            const data = await response.json();
+            console.log(data.message); // Message de confirmation
+            window.location.reload();
+          } catch (error) {
+            console.error(error.message);
+            alert("Une erreur est survenue lors de l’ajout de la tâche.");
+          }
+        } else {
+          alert("Veuillez remplir tous les champs!");
+        }
       }
     </script>
 

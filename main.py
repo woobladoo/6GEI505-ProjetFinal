@@ -1,8 +1,12 @@
-from flask import Flask, request, url_for, redirect, render_template, session, flash ##import de la classe flask et de certaines fonctions utiles
+from flask import Flask, request, url_for, redirect, render_template, session, flash, jsonify ##import de la classe flask et de certaines fonctions utiles
 from datetime import date
+from collections import namedtuple
 import sqlite3
 
 app = Flask(__name__,template_folder='templates', static_folder='static') ##Instanciation de la classe flask
+
+Tache = namedtuple('Tache', ['id', 'projet_id', 'statut', 'nom', 'dateDebut', 'dateFin', 'employes'])
+
 
 app.config['SECRET_KEY'] = 'gros secret'
 DB = 'DATA.db'
@@ -19,7 +23,7 @@ def check_user_exists(username, password):
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute("SELECT * FROM Employe WHERE courriel = ? AND motPasse = ?", (username, password))
+    cursor.execute("SELECT * FROM Employee_emp WHERE emp_courriel = ? AND emp_motPasse = ?;", (username, password))
     user = cursor.fetchone()
     
     return user is not None
@@ -27,15 +31,23 @@ def check_user_exists(username, password):
 def get_user_role(username):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT idRole FROM Employe WHERE courriel = ?", (username,))
+    cursor.execute("SELECT emp_role_id AS idRole FROM Employee_emp WHERE emp_courriel = ?;", (username,))
     role = cursor.fetchone()
     conn.close()
     return role[0] if role else None
 
+def get_user(username):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Employee_emp WHERE emp_courriel = ?;", (username,))  # Adjust columns as needed
+    user = cursor.fetchall()
+    conn.close()
+    return user
+
 def get_employes():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT prenom, nom, courriel, telephone, idRole FROM Employe")  # Adjust columns as needed
+    cursor.execute("SELECT emp_id AS id, emp_prenom AS prenom, emp_nom AS nom, emp_courriel AS courriel, emp_telephone AS telephone, emp_role_id AS idRole FROM Employee_emp;")  # Adjust columns as needed
     employes = cursor.fetchall()
     conn.close()
     return employes
@@ -45,23 +57,152 @@ def get_projets():
     cursor = conn.cursor()
 
     query = '''
-    SELECT Projet.id, Projet.idClient, Projet.etatProjet, Projet.idChef, Projet.nom, Projet.dateDebut, Projet.dateFin,
-        Client.prenom || ' ' || Client.nom AS client_name, Employe.prenom || ' ' || Employe.nom AS manager_name
-    FROM Projet
-    LEFT JOIN Client ON Projet.idClient = Client.id
-    LEFT JOIN Employe ON Projet.idChef = Employe.id
+    SELECT Projet_proj.proj_id AS id, 
+        Projet_proj.proj_clnt_id AS idClient, 
+        Projet_proj.proj_etat_etat AS etatProjet, 
+        Projet_proj.proj_emp_id AS idChef, 
+        Projet_proj.proj_nom AS nom, 
+        Projet_proj.proj_dateDebut AS dateDebut, 
+        Projet_proj.proj_dateFin AS dateFin, 
+        Client_clnt.clnt_prenom || ' ' || Client_clnt.clnt_nom AS client_name, 
+        Employee_emp.emp_prenom || ' ' || Employee_emp.emp_nom AS manager_name
+    FROM Projet_proj
+    LEFT JOIN Client_clnt ON Projet_proj.proj_clnt_id = Client_clnt.clnt_id
+    LEFT JOIN Employee_emp ON Projet_proj.proj_emp_id = Employee_emp.emp_id;
+    
     '''
     cursor.execute(query) #Cherche tous les projets dans la table projet
     projets = cursor.fetchall()
     conn.close()
     return projets
 
+def get_projet_by_id(proj_id):
+    conn1 = sqlite3.connect(DB)  # Connect to the DB
+    cursor1 = conn1.cursor()
+
+    query = """
+    SELECT 
+        Projet_proj.proj_id AS id, 
+        Projet_proj.proj_clnt_id AS idClient, 
+        Projet_proj.proj_etat_etat AS etatProjet, 
+        Projet_proj.proj_emp_id AS idChef, 
+        Projet_proj.proj_nom AS nom, 
+        Projet_proj.proj_dateDebut AS dateDebut, 
+        Projet_proj.proj_dateFin AS dateFin, 
+        Client_clnt.clnt_prenom || ' ' || Client_clnt.clnt_nom AS client_name, 
+        Employee_emp.emp_prenom || ' ' || Employee_emp.emp_nom AS manager_name
+    FROM Projet_proj
+    LEFT JOIN Client_clnt ON Projet_proj.proj_clnt_id = Client_clnt.clnt_id
+    LEFT JOIN Employee_emp ON Projet_proj.proj_emp_id = Employee_emp.emp_id
+    WHERE Projet_proj.proj_id = ?;
+    """
+    
+    # Use a parameterized query to execute
+    cursor1.execute(query, (proj_id,))  
+    projet = cursor1.fetchone()  # Fetch a single result
+    conn1.close()
+    
+    return projet
+
+def get_taches_by_project(proj_id):
+    conn = sqlite3.connect(DB)  # Connect to the database
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 
+        Tache_tch.tch_id AS id, 
+        Tache_tch.tch_proj_id AS projet_id, 
+        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Tache_tch.tch_nom AS nom, 
+        Tache_tch.tch_dateDebut AS dateDebut, 
+        Tache_tch.tch_dateFin AS dateFin
+    FROM Tache_tch
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    WHERE Tache_tch.tch_proj_id = ? AND Tache_tch.tch_parent IS NULL;
+    """
+    cursor.execute(query, (proj_id,))
+    taches = cursor.fetchall()
+    conn.close()
+    
+    return taches
+
+def get_soustaches_by_tache(task_id):
+    conn = sqlite3.connect(DB)  # Connect to the database
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 
+        Tache_tch.tch_id AS id, 
+        Tache_tch.tch_proj_id AS projet_id, 
+        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Tache_tch.tch_nom AS nom, 
+        Tache_tch.tch_dateDebut AS dateDebut, 
+        Tache_tch.tch_dateFin AS dateFin
+    FROM Tache_tch
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    WHERE Tache_tch.tch_parent = ?
+    """
+    cursor.execute(query, (task_id,))
+    taches = cursor.fetchall()
+    conn.close()
+    
+    return taches
+
+def get_tache_by_id(task_id):
+    conn = sqlite3.connect(DB)  # Connect to the database
+    conn.row_factory = sqlite3.Row  # Use Row factory to access columns by name
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT 
+        Tache_tch.tch_id AS id, 
+        Tache_tch.tch_proj_id AS projet_id, 
+        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Tache_tch.tch_nom AS nom, 
+        Tache_tch.tch_dateDebut AS dateDebut, 
+        Tache_tch.tch_dateFin AS dateFin,
+        GROUP_CONCAT(Employee_emp.emp_prenom || ' ' || Employee_emp.emp_nom) AS employes  -- Combine first and last names
+    FROM Tache_tch
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    LEFT JOIN EmployeeTache_emptch ON Tache_tch.tch_id = EmployeeTache_emptch.emptch_tch_id  -- Join with EmployeeTache_emptch table
+    LEFT JOIN Employee_emp ON EmployeeTache_emptch.emptch_emp_id = Employee_emp.emp_id  -- Join with Employee_emp table
+    WHERE Tache_tch.tch_id = ?  -- Only filter by task_id
+    GROUP BY Tache_tch.tch_id;
+    """
+    
+    cursor.execute(query, (task_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        # Convert Row object to a named tuple
+        employes = row['employes'].split(',') if row['employes'] else []
+        tache = Tache(
+            id=row['id'],
+            projet_id=row['projet_id'],
+            statut=row['statut'],
+            nom=row['nom'],
+            dateDebut=row['dateDebut'],
+            dateFin=row['dateFin'],
+            employes=employes
+        )
+    else:
+        tache = None  # Explicitly set to None if no task is found
+
+    print("Tache:", tache)
+    return tache
+
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
     query = '''
-    SELECT id, nom, prenom, courriel, telephone, status
-    FROM Client
+    SELECT clnt_id AS id, 
+        clnt_nom AS nom, 
+        clnt_prenom AS prenom, 
+        clnt_courriel AS courriel, 
+        clnt_telephone AS telephone, 
+        clnt_status AS status
+    FROM Client_clnt;
     '''
     cursor.execute(query)
     clients = cursor.fetchall()
@@ -73,9 +214,12 @@ def get_gestionnaires():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
     query = '''
-    SELECT id, idRole, nom, prenom
-    FROM Employe
-    WHERE idRole = 1 OR idRole = 2
+    SELECT emp_id AS id, 
+        emp_role_id AS idRole, 
+        emp_nom AS nom, 
+        emp_prenom AS prenom
+    FROM Employee_emp
+    WHERE emp_role_id = 1 OR emp_role_id = 2;
     '''
     cursor.execute(query)
     gestionnaires = cursor.fetchall()
@@ -118,20 +262,85 @@ def logout():
 
 @app.route('/profil', methods=['GET', 'POST'])
 def profil():
-    return render_template('profil.html')
+    courriel = session.get('username')
+    user = get_user(courriel)
+    return render_template('profil.html', user=user)
 
 @app.route('/employes', methods=['GET', 'POST'])
 def employes():
     listeEmploye = get_employes()
     return render_template('employes.html', employes=listeEmploye)
 
-@app.route('/projet', methods=['GET', 'POST'])
-def projet():
-    return render_template('projet.html')
+@app.route('/projet/<int:id>', methods=['GET'])
+def projet(id):
 
-@app.route('/tache', methods=['GET', 'POST'])
-def tache():
-    return render_template('taches.html')
+    projet = get_projet_by_id(id)
+    if projet is None:
+        return "Project not found", 404  # Or render a custom 404 page
+    
+    taches = get_taches_by_project(id)
+
+    # Rendre la page avec les détails du projet
+    return render_template('projet.html', projet=projet, taches=taches)
+
+
+
+@app.route('/projet/<int:proj_id>/tache/<int:task_id>', methods=['GET', 'POST'])
+def tache(proj_id, task_id):
+    projet = get_projet_by_id(proj_id)
+    if projet is None:
+        return "Project not found", 404  # Or render a custom 404 page
+
+    tache = get_tache_by_id(task_id)
+    if tache is None:
+        return "Task not found", 404  # Or render a custom 404 page
+    
+    sousTaches = get_soustaches_by_tache(task_id)
+
+    listeEmploye = get_employes()
+
+    print("Taches data:", tache)  # Debug print to see the data structure
+
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye)
+
+@app.route('/add_tache', methods=['POST'])
+def add_tache():
+    data = request.json
+    print(data)
+    name = data.get('name')
+    start = data.get('start')
+    end = data.get('end')
+    proj_id = data.get('projid')
+    parent_id = data.get('parentid')
+
+    if name and start and end:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Tache_tch (tch_nom, tch_dateDebut, tch_dateFin, tch_proj_id, tch_parent, tch_etat_etat)
+            VALUES (?, ?, ?, ?, ?, 1)
+        """, (name, start, end, proj_id, parent_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Tâche ajoutée avec succès!"}), 201
+
+    return jsonify({"error": "Données incomplètes"}), 400
+
+@app.route('/delete_tache/<int:projid>/<int:tacheid>', methods=['POST'])
+def delete_tache(tacheid, projid):
+    # Connect to the database
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Execute DELETE statement to remove the task by its ID
+    cursor.execute("DELETE FROM Tache_tch WHERE tch_id = ?", (tacheid,))
+    conn.commit()
+    conn.close()
+
+    # Redirect to the project or task page (depending on how you want to handle it)
+    flash('Task deleted successfully', 'success')
+    return redirect(url_for('projet', id=projid))  # Redirect to the project page, adjust as needed
+
 
 @app.route('/add_projet', methods=['GET', 'POST'])
 def add_projet():
@@ -155,8 +364,8 @@ def add_projet_todb():
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
     query = '''
-    INSERT INTO Projet (idClient, etatProjet, idChef, nom, dateDebut, dateFin, isTemplate)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO Projet_proj (proj_clnt_id, proj_etat_etat, proj_emp_id, proj_nom, proj_dateDebut, proj_dateFin, proj_isTemplate)
+    VALUES (?, ?, ?, ?, ?, ?, ?);
     '''
     cursor.execute(query, (client_id, 1, gestionnaire_id, nom, date_debut, date_fin, is_template))
     conn.commit()
@@ -168,14 +377,75 @@ def add_projet_todb():
 
 @app.route('/delete_projet/<int:projet_id>', methods=['POST'])
 def delete_projet(projet_id):
+    # Connect to the database
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
-    query = 'DELETE FROM Projet WHERE id = ?'
-    cursor.execute(query, (projet_id,))
+
+    # First, delete all tasks related to the project
+    cursor.execute("DELETE FROM Tache_tch WHERE tch_proj_id = ?", (projet_id,))
+    
+    # Now, delete the project itself
+    cursor.execute("DELETE FROM Projet_proj WHERE proj_id = ?", (projet_id,))
+
+    # Commit the changes to the database
     conn.commit()
     conn.close()
 
-    return redirect(url_for('listeProjets'))  # Redirect to the project list or another page
+    # Redirect to the project list or another page
+    flash('Project and all associated tasks deleted successfully', 'success')
+    return redirect(url_for('listeProjets'))  # Adjust redirection as necessary
+
+
+@app.route('/delete_employee/<int:employee_id>', methods=['POST'])
+def delete_employee(employee_id):
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+    query = 'DELETE FROM Employee_emp WHERE emp_id = ?;'
+    cursor.execute(query, (employee_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('employes'))  # Redirect to the project list or another page
+
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    session_courriel = session.get('username')
+    user = get_user(session_courriel)
+    # Get the form data from the request
+    prenom = request.form['prenom']
+    nom = request.form['nom']
+    courriel = request.form['courriel']
+    telephone = request.form['telephone']
+    role = request.form['role']
+    print(user[0]['emp_id'])
+    print(prenom)
+    print(nom)
+    print(courriel)
+    print(telephone)
+    print(role)
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Update the user data using a parameterized query
+    cursor.execute("""
+        UPDATE Employee_emp
+        SET emp_prenom = ?, emp_nom = ?, emp_courriel = ?, emp_telephone = ?, emp_role_id = ?
+        WHERE emp_id = ?
+    """, (prenom, nom, courriel, telephone, role, user[0]['emp_id']))
+
+    conn.commit()
+    conn.close()
+
+    # Update the user information in the database
+    #update_user_in_db(user_id, prenom, nom, courriel, telephone, role)
+
+    # After updating, redirect to the profile page
+    return redirect(url_for('profil'))
+
+
+
 @app.route('/inscription', methods=['GET', 'POST'])
 def inscription():
     if request.method == 'POST':
@@ -193,7 +463,7 @@ def inscription():
         conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         
-        query ='INSERT INTO Employe (idrole, nom, prenom, courriel, telephone, motPasse) VALUES (?, ?, ?, ?, ?, ?)'
+        query ='INSERT INTO Employee_emp (emp_role_id, emp_nom, emp_prenom, emp_courriel, emp_telephone, emp_motPasse) VALUES (?, ?, ?, ?, ?, ?);'
         try:
             cursor.execute(query, (idrole, nom, prenom, username, telephone, mot_de_passe))
             conn.commit()
@@ -209,5 +479,51 @@ def inscription():
 
     return render_template('inscription.html')
 
+@app.route('/add_employe_to_tache', methods=['POST'])
+def add_employe_to_tache():
+    try:
+        # Récupération des données envoyées par le client
+        data = request.get_json()
+        tache_id = data.get('tache_id')  # ID de la tâche
+        employe_id = data.get('employe_id')  # ID de l'employé à associer
+
+        # Validation des données
+        if not tache_id or not employe_id:
+            return jsonify({'message': 'Les champs tache_id et employe_id sont requis.'}), 400
+
+        # Connectez-vous à votre base de données (exemple SQLite)
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+
+        # Vérifier si la tâche existe
+        cursor.execute("SELECT tch_id FROM Tache_tch WHERE id = ?", (tache_id,))
+        tache = cursor.fetchone()
+        if not tache:
+            return jsonify({'message': 'Tâche non trouvée.'}), 404
+
+        # Vérifier si l'employé existe
+        cursor.execute("SELECT emp_id FROM Employee_emp WHERE id = ?", (employe_id,))
+        employe = cursor.fetchone()
+        if not employe:
+            return jsonify({'message': 'Employé non trouvé.'}), 404
+
+        # Ajouter la relation tâche-employé dans une table associée (exemple : `taches_employes`)
+        try:
+            # Insérer la relation tâche-employé dans la table
+            cursor.execute("""
+                INSERT INTO EmployeeTache_emptch (emptch_tch_id, emptch_emp_id)
+                VALUES (?, ?)
+            """, (tache_id, employe_id))
+            connection.commit()
+        except sqlite3.Error as e:
+            connection.close()
+            return jsonify({'message': f'Erreur SQL: {str(e)}'}), 500
+        
+        return jsonify({'message': 'Employé ajouté à la tâche avec succès.'}), 201
+
+    except Exception as e:
+        return jsonify({'message': f'Erreur lors de l’ajout de l’employé : {str(e)}'}), 500
+
+
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)

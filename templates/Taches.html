@@ -3,8 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Projet 1: Gestionnaire de Projet et de Temps</title>
-    <link rel="stylesheet" href="../static/css/tache.css" />
+    <title>{{ projet[4] }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tache.css') }}"
+    />
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -14,144 +18,386 @@
   </head>
   <body>
     <div class="header">
-      <h4>PROJET 1: Développement Gestionnaire de Projet et de Temps</h4>
+      <h4>{{ projet[4] }}</h4>
       <div class="menu">
-        <a href="{{ url_for('projet') }}" class="highlight-link">Retour</a>
+        <a href="{{ url_for('projet', id=projet[0]) }}" class="highlight-link"
+          >Retour</a
+        >
         <a href="{{ url_for('listeProjets') }}" class="highlight-link"
           >Projets</a
         >
         <a href="{{ url_for('profil') }}" class="highlight-link">Profil</a>
         <a href="#" class="user-icon">
           <img
-            src="../static/images/icon_utiliateur.jpg"
+            src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}"
             alt="User Icon"
             width="40"
             height="40"
         /></a>
       </div>
     </div>
+    
     <div class="divider"></div>
-    <h4 class="taches">
-      Revue de l'état de l'art
-      <button type="button" class="btn btn-outline-danger m-3">
-        Supprimer Tâche
-      </button>
-    </h4>
-
-    <div class="project-details">
-      <div class="part3">
-        <p>Début: 24-10-2024</p>
-        <p>Fin: 17-12-2024</p>
+    <div class="container-fluid d-flex justify-content-between">
+      <div class="tache-titre" style="padding-right: 20px;">
+        <div class="d-flex align-items-center">
+          <h4 class="mb-0 me-2" style="font-size: 35px;">{{ tache[3] }}</h4> <!-- Task title -->
+          <form method="POST" action="{{ url_for('delete_tache', projid=projet[0], tacheid=tache[0]) }}" class="mb-0">
+            <button type="submit" class="btn btn-danger">Delete Task</button>
+          </form>
+        </div>
+      </div>
+    
+      <div class="project-details gap-4">
+        <div class="part3">
+          <p>Début: {{ tache[4] }}</p>
+          <p>Fin: {{ tache[5] }}</p>
+        </div>
+    
+        <div class="column2">
+          <button type="button" class="btn btn-secondary">
+            Ajouter du temps
+          </button>
+          <button type="button" onclick="showAddEmployeForm()" class="btn btn-primary">
+            Ajouter employé
+          </button>
+          <button type="button" class="btn btn-light">
+            Modifier statut
+          </button>
+        </div>
       </div>
     </div>
-    <h6 class="A_faire">Description</h6>
-    <h4 class="en_cours">Équipe sur la Tâche</h4>
+    
+    
+    
+    
 
-    <div class="tasks-container">
+    <h4 class="description">Description</h4>   
+
+    
       <div class="column">
         <p style="font-size: 12px">
           Cette tâche consiste à faire des recherches sur les différentes
           fonctionnalités qu'on utilise
         </p>
       </div>
-      <div class="column1">
-        <p>
-          <a href="#" class="user-icon">
-            <img
-              src="../static/images/icon_utiliateur.jpg"
-              alt="User Icon"
-              width="40"
-              height="40"
-          /></a>
-          Mayatta Ndiaye
+      
+      <div class="equipe">
+        <h4>Équipe sur la tâche</h4>
+        {% if tache and tache['employes'] %}
+          {% for employe in tache['employes'] %}
+            <p>
+              <a href="#" class="user-icon">
+                <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
+              </a>
+              {{ employe }}
+            </p>
+          {% endfor %}
+        {% else %}
+          <p>Aucun employé n'est assigné à cette tâche.</p>
+        {% endif %}
+      </div>
+      
+      
+      
+
+      </div>
+        
         </p>
-        <p>
-          <a href="#" class="user-icon">
-            <img
-              src="../static/images/icon_utiliateur.jpg"
-              alt="User Icon"
-              width="40"
-              height="40"
-          /></a>
-          Antoine Methot
-        </p>
-        <p>
-          <a href="#" class="user-icon">
-            <img
-              src="../static/images/icon_utiliateur.jpg"
-              alt="User Icon"
-              width="40"
-              height="40"
-          /></a>
-          Maxime Simard
-        </p>
-        <h4 class="sous_taches">Sous-Tâches</h4>
-        <div class="form-check" style="margin-left: -500px">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            value=""
-            id="flexCheckDefault"
-          />
-          <label class="form-check-label" for="flexCheckDefault">
-            Choix de langage
-          </label>
+        <h4 class="equipe">Sous-tâches</h4>
+
+        <div class="task-status">
+          <h4 class="A_faire">À FAIRE</h4>
+          <h4 class="en_cours">EN COURS</h4>
+          <h4 class="complete">COMPLÉTÉ</h4>
         </div>
-        <div class="form-check" style="margin-left: -500px">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            value=""
-            id="flexCheckDefault"
-          />
-          <label class="form-check-label" for="flexCheckDefault">
-            Back-end
-          </label>
+
+        <div class="tasks-container row">
+          <div
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+            <button class="add-button" onclick="showTaskForm()">+</button>
+            <div id="task-form-container" style="display: none"></div>
+    
+            <!-- Affichage dynamique des taches -->
+            {% for sousTache in sousTaches %}
+    
+            <div
+              class="task"
+              id="task{{ tache[0] }}"
+              draggable="true"
+              ondragstart="drag(event)"
+            >
+              <!-- Nom tâche -->
+              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                <p>{{ sousTache[3] }}</p>
+              </a>
+              <p>Début: {{ sousTache[4] }}</p>
+              <p>Fin: {{ sousTache[5] }}</p>
+              <p>Statut: {{ sousTache[2] }}</p>
+              <div class="icons">👤👤👤</div>
+            </div>
+    
+            {% endfor %}
+          </div>
+    
+          <div
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+            <button class="add-button" onclick="showTaskForm()">+</button>
+          </div>
+    
+          <div
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+            <button class="add-button" onclick="showTaskForm()">+</button>
+          </div>
         </div>
-        <div class="form-check" style="margin-left: -500px">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            value=""
-            id="flexCheckDefault"
-          />
-          <label class="form-check-label" for="flexCheckDefault">
-            Front-end
-          </label>
-        </div>
-        <div class="form-check" style="margin-left: -500px">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            value=""
-            id="flexCheckDefault"
-          />
-          <label class="form-check-label" for="flexCheckDefault">
-            Technologie
-          </label>
-        </div>
-        <div class="form-check" style="margin-left: -500px">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            value=""
-            id="flexCheckDefault"
-          />
-          <label class="form-check-label" for="flexCheckDefault">
-            Sous-tâche
-          </label>
-        </div>
+
+        <!-- Overlay -->
+      <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
+
+      <!-- Formulaire ajout employer -->
+      <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
+
+      <div id="add-employe-form" class="modal-custom">
+        <input type="hidden" id="tache-id" value="{{ tache[0] }}" />
+        <label for="employe-id">Employé :</label>
+        <select id="employe-id" class="form-control">
+          {% for employe in employes %}
+          <option value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
+          {% endfor %}
+        </select>
+        <button onclick="addEmployeToTache()" class="btn btn-success mt-2">Associer</button>
+        <button onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
       </div>
 
-      <div class="column2">
-        <button type="button" class="btn btn-outline-primary">
-          Ajouter employé
-        </button>
-        <button type="button" class="btn btn-outline-primary">
-          Modifier statut
-        </button>
+
+        <script>
+          // Afficher le formulaire d'ajout d'employé en popup
+          function showAddEmployeForm() {
+            document.getElementById("modal-overlay").style.display = "block";
+            document.getElementById("add-employe-form").style.display = "block";
+          }
+
+          // Cacher le formulaire d'ajout d'employé en popup
+          function hideAddEmployeForm() {
+            document.getElementById("modal-overlay").style.display = "none";
+            document.getElementById("add-employe-form").style.display = "none";
+          }
+
+          // Fonction pour envoyer les données au backend (inchangée)
+          async function addEmployeToTache() {
+            const tacheId = document.getElementById("tache-id").value;
+            const employeId = document.getElementById("employe-id").value;
+
+            if (!tacheId || !employeId) {
+              alert("Veuillez sélectionner un employé.");
+              return;
+            }
+
+            try {
+              const response = await fetch("/add_employe_to_tache", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tache_id: tacheId, employe_id: employeId }),
+              });
+
+              if (!response.ok) {
+                throw new Error("Erreur lors de l’ajout de l’employé.");
+              }
+
+              const data = await response.json();
+              alert(data.message);
+              hideAddEmployeForm(); // Fermer le popup après succès
+              window.location.reload();
+            } catch (error) {
+              console.error(error.message);
+              alert("Une erreur est survenue.");
+            }
+          }
+
+        </script>
+
+
+        <script>
+          // Fonction pour autoriser le dépôt
+          function allowDrop(ev) {
+            ev.preventDefault(); // Permet de déposer l'élément
+          }
+    
+          // Fonction pour commencer à draguer l'élément
+          function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
+    
+            if (ev.target.classList.contains("task")) {
+              ev.dataTransfer.setData("text", ev.target.id);
+            }
+          }
+    
+          // Fonction pour gérer le dépôt de l'élément
+          function drop(ev) {
+            ev.preventDefault(); // Empêche l'action par défaut
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data); // Récupère l'élément dragué
+            ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+    
+           // Vérifiez que la cible est une zone valide (par exemple, une colonne)
+            if (ev.target.classList.contains("column")) {
+              ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+            }
+          }
+        </script>
+
+<script>
+  // Fonction pour afficher le formulaire
+  function showTaskForm() {
+    const formContainer = document.getElementById("task-form-container");
+
+    // Créez le formulaire dynamique
+    formContainer.innerHTML = `
+      <div class="task-form-overlay">
+        <div class="task-form">
+          <h5>Ajouter une Tâche</h5>
+          <input type="hidden" id="task-project" class="form-control" value="{{ projet[0] }}" required />
+          <label for="task-name">Nom de la tâche:</label>
+          <input type="text" id="task-name" class="form-control" required />
+
+          <label for="task-start">Début:</label>
+          <input type="date" id="task-start" class="form-control" required />
+
+          <label for="task-end">Fin:</label>
+          <input type="date" id="task-end" class="form-control" required />
+
+          <button onclick="addTask()" class="btn btn-primary mt-3">Ajouter</button>
+          <button onclick="hideTaskForm()" class="btn btn-secondary mt-3">Annuler</button>
+        </div>
       </div>
-    </div>
+    `;
+    formContainer.style.display = "block";
+  }
+
+  // Fonction pour cacher le formulaire
+  function hideTaskForm() {
+    const formContainer = document.getElementById("task-form-container");
+    formContainer.style.display = "none";
+    formContainer.innerHTML = "";
+  }
+
+  // Fonction pour ajouter une tâche
+  function addTask() {
+    const projid = document.getElementById("task-project").value;
+    const name = document.getElementById("task-name").value;
+    const start = document.getElementById("task-start").value;
+    const end = document.getElementById("task-end").value;
+    const parentid = "{{ tache[0] }}";
+
+    if (name && start && end) {
+      // Créez un nouvel élément de tâche
+      const taskContainer = document.querySelector(
+        ".column.col-12.col-md-4"
+      );
+      const newTask = document.createElement("div");
+      const taskId = `task-${Date.now()}`;
+      newTask.className = "task";
+      newTask.id = taskId;
+      newTask.draggable = true;
+      newTask.ondragstart = drag;
+
+      newTask.innerHTML = `
+      <p>${name}</p>
+      <p>Début: ${start}</p>
+      <p>Fin: ${end}</p>
+      <p>Statut:</p>
+      <div class="icons">👤👤👤</div>
+      <button class="delete-button" onclick="deleteTask('${taskId}')">🗑️</button>
+    `;
+
+      // Ajoutez la tâche à la colonne "À FAIRE"
+      taskContainer.appendChild(newTask);
+
+      // Cachez le formulaire
+      hideTaskForm();
+    } else {
+      alert("Veuillez remplir tous les champs!");
+    }
+  }
+</script>
+
+<script>
+  // Fonction pour supprimer une tâche
+  function deleteTask(taskId) {
+    const taskElement = document.getElementById(taskId);
+    console.log(taskId);
+    if (taskElement) {
+      taskElement.remove(); // Supprime l'élément du DOM
+    }
+  }
+
+  // Ajoutez le bouton de suppression lors de la création d'une tâche dynamique
+  async function addTask() {
+    const projid = document.getElementById("task-project").value;
+    const name = document.getElementById("task-name").value;
+    const start = document.getElementById("task-start").value;
+    const end = document.getElementById("task-end").value;
+    const parentid = "{{ tache[0] }}";
+
+    if (name && start && end) {
+      // Créez un nouvel élément de tâche
+      const taskContainer = document.querySelector(
+        ".column.col-12.col-md-4"
+      );
+      const newTask = document.createElement("div");
+      const taskId = `task-${Date.now()}`;
+      newTask.className = "task";
+      newTask.id = taskId;
+      newTask.draggable = true;
+      newTask.ondragstart = drag;
+      newTask.innerHTML = `
+        <p>${name}</p>
+        <p>Début: ${start}</p>
+        <p>Fin: ${end}</p>
+        <p>Statut:</p>
+        <div class="icons">👤👤👤</div>
+        <button class="delete-button" onclick="deleteTask('${taskId}')">🗑️</button>
+      `;
+
+      // Ajoutez la tâche à la colonne "À FAIRE"
+      taskContainer.appendChild(newTask);
+
+      // Cachez le formulaire
+      hideTaskForm();
+
+      // Enregistrez les détails dans la base de données
+      try {
+        const response = await fetch("/add_tache", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ parentid, projid, name, start, end }),
+        });
+        if (!response.ok) {
+          throw new Error("Erreur lors de l’ajout à la base de données.");
+        }
+        const data = await response.json();
+        console.log(data.message); // Message de confirmation
+        window.location.reload();
+      } catch (error) {
+        console.error(error.message);
+        alert("Une erreur est survenue lors de l’ajout de la tâche.");
+      }
+    } else {
+      alert("Veuillez remplir tous les champs!");
+    }
+  }
+</script>
+     
+    
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
