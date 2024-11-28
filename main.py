@@ -296,10 +296,12 @@ def tache(proj_id, task_id):
         return "Task not found", 404  # Or render a custom 404 page
     
     sousTaches = get_soustaches_by_tache(task_id)
-    
+
+    listeEmploye = get_employes()
+
     print("Taches data:", tache)  # Debug print to see the data structure
 
-    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches)
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
@@ -476,6 +478,52 @@ def inscription():
         return redirect(url_for('login'))
 
     return render_template('inscription.html')
+
+@app.route('/add_employe_to_tache', methods=['POST'])
+def add_employe_to_tache():
+    try:
+        # Récupération des données envoyées par le client
+        data = request.get_json()
+        tache_id = data.get('tache_id')  # ID de la tâche
+        employe_id = data.get('employe_id')  # ID de l'employé à associer
+
+        # Validation des données
+        if not tache_id or not employe_id:
+            return jsonify({'message': 'Les champs tache_id et employe_id sont requis.'}), 400
+
+        # Connectez-vous à votre base de données (exemple SQLite)
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+
+        # Vérifier si la tâche existe
+        cursor.execute("SELECT tch_id FROM Tache_tch WHERE id = ?", (tache_id,))
+        tache = cursor.fetchone()
+        if not tache:
+            return jsonify({'message': 'Tâche non trouvée.'}), 404
+
+        # Vérifier si l'employé existe
+        cursor.execute("SELECT emp_id FROM Employee_emp WHERE id = ?", (employe_id,))
+        employe = cursor.fetchone()
+        if not employe:
+            return jsonify({'message': 'Employé non trouvé.'}), 404
+
+        # Ajouter la relation tâche-employé dans une table associée (exemple : `taches_employes`)
+        try:
+            # Insérer la relation tâche-employé dans la table
+            cursor.execute("""
+                INSERT INTO EmployeeTache_emptch (emptch_tch_id, emptch_emp_id)
+                VALUES (?, ?)
+            """, (tache_id, employe_id))
+            connection.commit()
+        except sqlite3.Error as e:
+            connection.close()
+            return jsonify({'message': f'Erreur SQL: {str(e)}'}), 500
+        
+        return jsonify({'message': 'Employé ajouté à la tâche avec succès.'}), 201
+
+    except Exception as e:
+        return jsonify({'message': f'Erreur lors de l’ajout de l’employé : {str(e)}'}), 500
+
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(host='0.0.0.0',debug=True)
