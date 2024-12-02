@@ -380,10 +380,18 @@ def delete_projet(projet_id):
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
 
-    # First, delete all tasks related to the project
+    # First, delete all sub-tasks linked to the tasks of the project
+    cursor.execute("""
+        DELETE FROM Tache_tch 
+        WHERE tch_parent IN (
+            SELECT tch_id FROM Tache_tch WHERE tch_proj_id = ?
+        )
+    """, (projet_id,))
+
+    # Then, delete all tasks directly linked to the project
     cursor.execute("DELETE FROM Tache_tch WHERE tch_proj_id = ?", (projet_id,))
-    
-    # Now, delete the project itself
+
+    # Finally, delete the project itself
     cursor.execute("DELETE FROM Projet_proj WHERE proj_id = ?", (projet_id,))
 
     # Commit the changes to the database
@@ -391,8 +399,9 @@ def delete_projet(projet_id):
     conn.close()
 
     # Redirect to the project list or another page
-    flash('Project and all associated tasks deleted successfully', 'success')
+    #flash('Project, all associated tasks, and sub-tasks deleted successfully', 'success')
     return redirect(url_for('listeProjets'))  # Adjust redirection as necessary
+
 
 
 @app.route('/delete_employee/<int:employee_id>', methods=['POST'])
