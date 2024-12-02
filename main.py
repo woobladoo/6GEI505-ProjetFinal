@@ -582,10 +582,12 @@ def visualization(project_id):
     """, (project_id,))
     tasks = cursor.fetchall()
 
+    projet = get_projet_by_id(project_id)
+
     conn.close()
 
     # Pass data to the template
-    return render_template('visualization.html', project_id=project_id, tasks=tasks)
+    return render_template('visualization.html', projet=projet, tasks=tasks)
 
 
 
