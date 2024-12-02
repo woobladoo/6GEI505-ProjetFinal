@@ -331,14 +331,20 @@ def delete_tache(tacheid, projid):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Execute DELETE statement to remove the task by its ID
+    # First, delete all sub-tasks linked to the task
+    cursor.execute("DELETE FROM Tache_tch WHERE tch_parent = ?", (tacheid,))
+
+    # Then, delete the task itself
     cursor.execute("DELETE FROM Tache_tch WHERE tch_id = ?", (tacheid,))
+
+    # Commit the changes to the database
     conn.commit()
     conn.close()
 
-    # Redirect to the project or task page (depending on how you want to handle it)
-    flash('Task deleted successfully', 'success')
+    # Redirect to the project page or task list
+    #flash('Task and all associated sub-tasks deleted successfully', 'success')
     return redirect(url_for('projet', id=projid))  # Redirect to the project page, adjust as needed
+
 
 
 @app.route('/add_projet', methods=['GET', 'POST'])
