@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Visualization</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/visualization.css') }}">
+</head>
+<body>
+    <button onclick="goBack()">Back</button>
+    <div class="container">
+        <header>
+            <h1>Projet : XXXX</h1>
+            <div>
+                <nav>
+                    <a href="{{ url_for('employes') }}">Employés</a>
+                    <a href="{{ url_for('listeProjets') }}">Projets</a>
+                    <a href="{{ url_for('profil') }}">Profil</a>
+                    <a href="/logout" class="logout-button">Se déconnecter</a>
+                </nav>
+            </div>
+        </header>
+        
+        <main>
+            <div class="timeline">
+                <div class="project">
+                    <div class="bar project-bar">PROJET</div>
+                </div>
+                <div class="task">
+                    <div class="bar task-bar">Task 1</div>
+                    <div class="sub-tasks">
+                        <div class="bar sub-task-bar">Sub Task 1</div>
+                        <div class="bar sub-task-bar">Sub Task 2</div>
+                    </div>
+                </div>
+                <div class="task">
+                    <div class="bar task-bar">Task 2</div>
+                    <div class="sub-tasks">
+                        <div class="bar sub-task-bar">Sub Task 3</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function goBack(){
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

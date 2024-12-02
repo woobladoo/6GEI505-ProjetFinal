@@ -568,6 +568,26 @@ def delete_employee_tache():
     # Rediriger l'utilisateur vers la page de la tâche ou autre page appropriée
     return redirect(url_for('tache', proj_id=projet_id, task_id=tache_id))
 
+@app.route('/visualization/<int:project_id>')
+def visualization(project_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Fetch project tasks and sub-tasks
+    cursor.execute("""
+        SELECT tch_id, tch_nom, tch_parent, tch_dateDebut, tch_dateFin 
+        FROM Tache_tch 
+        WHERE tch_proj_id = ? 
+        ORDER BY tch_parent ASC, tch_dateDebut ASC
+    """, (project_id,))
+    tasks = cursor.fetchall()
+
+    conn.close()
+
+    # Pass data to the template
+    return render_template('visualization.html', project_id=project_id, tasks=tasks)
+
+
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
     app.run(host='0.0.0.0',debug=True)
