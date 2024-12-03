@@ -96,11 +96,12 @@
                   <input type="hidden" name="employee_tache_id" value="{{ employe}}"> <!-- ID de l'employé -->
                   <input type="hidden" name="tach" value="{{ tache[0] }}"> <!-- ID de la tâche -->
                   <input type="hidden" name="proj" value="{{ projet[0] }}"> <!-- ID du projet -->
-                  
+                  {% if session.get('role') == 1 %}
                   <!-- Bouton poubelle pour supprimer l'employé -->
                   <button type="submit" class="btn btn-danger">
                       <i class="fas fa-trash"></i> Supprimer de la tâche
                   </button>
+                  {% endif %}
               </form>
             </p>
           {% endfor %}
@@ -132,14 +133,23 @@
           <h4 class="en_cours">EN COURS</h4>
           <h4 class="complete">COMPLÉTÉ</h4>
         </div>
+        {% for sousTache in sousTaches %}
+        <form id="task-update-form" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
+          <input type="hidden" id="task-id-input" name="task_id" value="{{sousTache[0]}}" />
+          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+          <input type="hidden" id="task-status-input" name="task_status" />
 
+          <input type="hidden" id="proj" name="proj"  />
+        {% endfor %}
+        </form>
         <div class="tasks-container row">
           <div
+            data-column="1"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-          {% if session.get('role') == 1 %}
+          {% if session.get('role') == 1 or session.get('role') == 2 %}
            <button class="add-button" onclick="showTaskForm()">+</button>
           {% endif %}
             <div id="task-form-container" style="display: none"></div>
@@ -167,6 +177,7 @@
           </div>
     
           <div
+            data-column="2"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
@@ -177,6 +188,7 @@
           </div>
     
           <div
+            data-column="3"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
@@ -250,9 +262,18 @@
             ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
     
            // Vérifiez que la cible est une zone valide (par exemple, une colonne)
-            if (ev.target.classList.contains("column")) {
-              ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
-            }
+          if (ev.target.classList.contains("column")) {
+            ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+          }
+
+            // Préparer les données à envoyer
+            const column = ev.target.getAttribute("data-column"); // Identifiant de la colonne (statut)
+            
+            // Mettre à jour la position avec le formulaire invisible
+            document.getElementById("task-status-input").value = column;
+            document.getElementById("proj").value = "{{ projet[0] }}";
+
+            document.getElementById("task-update-form").submit();
           }
         </script>
 

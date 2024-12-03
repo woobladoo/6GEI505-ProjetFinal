@@ -589,6 +589,38 @@ def visualization(project_id):
     # Pass data to the template
     return render_template('visualization.html', projet=projet, tasks=tasks)
 
+@app.route('/update_task', methods=['POST'])
+def update_task():
+    if request.method == 'POST':
+        print(request.form)
+        sous_tache_id = request.form['task_id']
+        tache_id = request.form['tache_id']
+        new_status = request.form['task_status']
+        projet_id = request.form['proj']
+        
+
+        if not sous_tache_id or not new_status:
+            return "Données invalides", 400
+
+        try:
+            # Connexion à la base de données
+            conn = get_db()
+            cursor = conn.cursor()
+
+            # Mise à jour du statut
+            cursor.execute("""
+                UPDATE Tache_tch SET tch_etat_etat = ? WHERE tch_id = ?
+            """, (new_status, sous_tache_id))
+            conn.commit()
+            conn.close()
+
+            # Redirection après mise à jour
+            return redirect(url_for('tache',proj_id = projet_id, task_id=tache_id))
+        except Exception as e:
+            return f"Erreur : {str(e)}", 500
+        
+    return redirect(url_for('tache',proj_id = projet_id, task_id=tache_id))
+
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
