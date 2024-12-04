@@ -52,10 +52,11 @@
         <div class="part3">
           <p>Début: {{ tache[4] }}</p>
           <p>Fin: {{ tache[5] }}</p>
+          <p>Temps total: {{ temps }}h </p>
         </div>
     
         <div class="column2">
-          <button type="button" class="btn btn-secondary">
+          <button type="button" onclick="showAddTime()" class="btn btn-secondary">
             Ajouter du temps
           </button>
           <button type="button" onclick="showAddEmployeForm()" class="btn btn-primary">
@@ -155,7 +156,9 @@
             <div id="task-form-container" style="display: none"></div>
     
             <!-- Affichage dynamique des taches -->
+             
             {% for sousTache in sousTaches %}
+            {% if sousTache[2] == "À faire" %}
     
             <div
               class="task"
@@ -172,7 +175,7 @@
               <p>Statut: {{ sousTache[2] }}</p>
               <div class="icons">👤👤👤</div>
             </div>
-    
+            {% endif %}
             {% endfor %}
           </div>
     
@@ -185,6 +188,27 @@
           {% if session.get('role') == 1 %}
            <button class="add-button" onclick="showTaskForm()">+</button>
           {% endif %}
+
+          {% for sousTache in sousTaches %}
+            {% if sousTache[2] == "En Cours" %}
+    
+            <div
+              class="task"
+              id="task{{ tache[0] }}"
+              draggable="true"
+              ondragstart="drag(event)"
+            >
+              <!-- Nom tâche -->
+              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                <p>{{ sousTache[3] }}</p>
+              </a>
+              <p>Début: {{ sousTache[4] }}</p>
+              <p>Fin: {{ sousTache[5] }}</p>
+              <p>Statut: {{ sousTache[2] }}</p>
+              <div class="icons">👤👤👤</div>
+            </div>
+            {% endif %}
+            {% endfor %}
           </div>
     
           <div
@@ -196,6 +220,27 @@
           {% if session.get('role') == 1 %}
            <button class="add-button" onclick="showTaskForm()">+</button>
           {% endif %}
+
+          {% for sousTache in sousTaches %}
+            {% if sousTache[2] == "Termine" %}
+    
+            <div
+              class="task"
+              id="task{{ tache[0] }}"
+              draggable="true"
+              ondragstart="drag(event)"
+            >
+              <!-- Nom tâche -->
+              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                <p>{{ sousTache[3] }}</p>
+              </a>
+              <p>Début: {{ sousTache[4] }}</p>
+              <p>Fin: {{ sousTache[5] }}</p>
+              <p>Statut: {{ sousTache[2] }}</p>
+              <div class="icons">👤👤👤</div>
+            </div>
+            {% endif %}
+            {% endfor %}
           </div>
         </div>
 
@@ -206,18 +251,24 @@
       <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
 
       <div id="add-employe-form" class="modal-custom">
-        <form action="/add_employe_to_tache" method="post">
-          <input type="hidden" name="tache_id" id="tache_id" value="{{ tache[0] }}" />
-          <input type="hidden" name="projet_id" id="projet_id" value="{{ projet[0] }}" />
-          <label for="employe_id">Employé :</label>
-          <select name= "employe_id" id="employe_id" class="form-control">
-            {% for employe in employes %}
-            <option  value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
-            {% endfor %}
-          </select>
-          <button onclick="hideAddEmployeForm" type="submit" class="btn btn-success mt-2">Associer</button>
-          <button  type="button"  onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
-        </form>
+        <input type="hidden" id="tache-id" value="{{ tache[0] }}" />
+        <label for="employe-id">Employé :</label>
+        <select id="employe-id" class="form-control">
+          {% for employe in employes %}
+          <option value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
+          {% endfor %}
+        </select>
+        <button onclick="addEmployeToTache()" class="btn btn-success mt-2">Associer</button>
+        <button onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
+      </div>
+
+      <div id="add-time-form" class="modal-custom">
+        <input type="hidden" id="tache-id" value="{{ tache[0] }}" />
+        <input type="hidden" id="employe-id1" value= "{{ user[0].emp_id }}" />
+        <label for="temps-ajoute">Temps à ajouter :</label>
+        <input type="number" id="temps-ajoute" placeholder="Temps en heures" required>
+        <button onclick="addTime()" class="btn btn-success mt-2">Ajouter</button>
+        <button onclick="hideAddTime()" class="btn btn-secondary mt-2">Annuler</button>
       </div>
 
 
@@ -228,10 +279,92 @@
             document.getElementById("add-employe-form").style.display = "block";
           }
 
+          function showAddTime() {
+            document.getElementById("modal-overlay").style.display = "block";
+            document.getElementById("add-time-form").style.display = "block";
+          }
+
+          // Cacher le formulaire d'ajout d'employé en popup
+          function hideAddTime() {
+            document.getElementById("modal-overlay").style.display = "none";
+            document.getElementById("add-time-form").style.display = "none";
+          }
+
           // Cacher le formulaire d'ajout d'employé en popup
           function hideAddEmployeForm() {
             document.getElementById("modal-overlay").style.display = "none";
             document.getElementById("add-employe-form").style.display = "none";
+          }
+
+
+
+          async function addTime() {
+            const tacheId = document.getElementById("tache-id").value;
+            const employeId = document.getElementById("employe-id1").value;
+            const tempsAjoute = document.getElementById("temps-ajoute").value;
+            console.log("Valeur de employe-id dans le DOM : ", document.getElementById("employe-id1").value);
+
+            if (!tacheId || !employeId || !tempsAjoute) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/ajouter_temps", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        tache_id: tacheId, 
+                        employe_id: employeId, 
+                        temps_ajoute: tempsAjoute 
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors de l'ajout de temps à l'employé.");
+                }
+
+                const data = await response.json();
+                alert(data.message);
+                hideAddTimeForm(); // Fermer le formulaire (si applicable)
+                window.location.reload(); // Recharger la page après succès
+            } catch (error) {
+                console.error(error.message);
+                alert("Une erreur est survenue.");
+            }
+        }
+
+         
+
+          // Fonction pour envoyer les données au backend (inchangée)
+          async function addEmployeToTache() {
+            const tacheId = document.getElementById("tache-id").value;
+            const employeId = document.getElementById("employe-id").value;
+
+            if (!tacheId || !employeId) {
+              alert("Veuillez sélectionner un employé.");
+              return;
+            }
+
+            try {
+              const response = await fetch("/add_employe_to_tache", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tache_id: tacheId, employe_id: employeId }),
+              });
+
+              if (!response.ok) {
+                throw new Error("Erreur lors de l’ajout de l’employé.");
+              }
+
+              const data = await response.json();
+              alert(data.message);
+              hideAddEmployeForm(); // Fermer le popup après succès
+              window.location.reload();
+            } catch (error) {
+              console.error(error.message);
+              alert("Une erreur est survenue.");
+            }
           }
 
           

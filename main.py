@@ -1,5 +1,5 @@
 from flask import Flask, request, url_for, redirect, render_template, session, flash, jsonify ##import de la classe flask et de certaines fonctions utiles
-from datetime import date
+from datetime import datetime, date
 from collections import namedtuple
 import sqlite3
 
@@ -52,6 +52,39 @@ def get_employes():
     conn.close()
     
     return employes
+
+import sqlite3
+
+def get_temps_total(task_id):
+    
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        # Exécution de la requête SQL pour calculer le temps total pour la tâche spécifiée
+        cursor.execute("""
+            SELECT SUM(tmp_heuresTravaille)
+            FROM Temps_tmp
+            JOIN EmployeeTache_emptch ON temps_tmp.tmp_emptch_id = EmployeeTache_emptch.emptch_id
+            WHERE EmployeeTache_emptch.emptch_tch_id = ?
+        """, (task_id,))
+
+        # Récupération du résultat
+        total_time = cursor.fetchone()[0]
+
+        # Fermeture de la connexion
+        conn.close()
+
+        # Si aucun résultat n'est trouvé, on retourne None
+        if total_time is None:
+            return 0  # ou `None` si vous préférez indiquer que la tâche n'a pas été trouvée
+
+        return total_time
+
+    except sqlite3.Error as e:
+        print(f"Erreur lors de l'accès à la base de données: {e}")
+        return None
+
 
 def get_projets():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -193,6 +226,26 @@ def get_tache_by_id(task_id):
    
     return tache
 
+
+def utilisateur_assigne_tache(user_id, task_id):
+    
+    conn = sqlite3.connect(DB) # Connect to DB
+    cursor = conn.cursor()
+
+    # Requête pour vérifier l'association de l'utilisateur à la tâche
+    query = """
+    SELECT 1
+    FROM EmployeeTache_emptch
+    WHERE emptch_emp_id = ? AND emptch_tch_id = ?
+    """
+    
+    cursor.execute(query, (user_id, task_id))
+    result = cursor.fetchone()
+    conn.close()
+
+    # Retourne True si un résultat est trouvé, sinon False
+    return result is not None
+
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
     cursor = conn.cursor()
@@ -279,6 +332,7 @@ def projet(id):
         return "Project not found", 404  # Or render a custom 404 page
     
     taches = get_taches_by_project(id)
+    print(taches)
 
     # Rendre la page avec les détails du projet
     return render_template('projet.html', projet=projet, taches=taches)
@@ -287,6 +341,11 @@ def projet(id):
 
 @app.route('/projet/<int:proj_id>/tache/<int:task_id>', methods=['GET', 'POST'])
 def tache(proj_id, task_id):
+    username = session.get('username')
+    user = get_user(username)
+    if not user:
+        return "User not found", 404
+
     projet = get_projet_by_id(proj_id)
     if projet is None:
         return "Project not found", 404  # Or render a custom 404 page
@@ -297,11 +356,13 @@ def tache(proj_id, task_id):
     
     sousTaches = get_soustaches_by_tache(task_id)
 
+    temps = get_temps_total(task_id)
+
     listeEmploye = get_employes()
     
 
 
-    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches, employes = listeEmploye)
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye, user=user, temps=temps)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
@@ -486,6 +547,43 @@ def inscription():
         return redirect(url_for('login'))
 
     return render_template('inscription.html')
+
+@app.route('/ajouter_temps', methods=['POST'])
+def ajouter_temps():
+
+    # Récupération des données du formulaire
+    data = request.get_json()
+    tache_id = data.get('tache_id')
+    temps_ajoute = int(data.get('temps_ajoute', 0))
+    employe_id = int(data.get('employe_id', 0))
+    now = datetime.now()
+    formatted_date = now.strftime("%Y-%m-%d")
+
+    # Connexion à la base de données SQLite
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+
+
+    # Vérifiez si l'employé est bien associé à la tâche dans la table EmployeeTache_emptch
+    print(f"Données reçues: {data}")
+    cursor.execute("SELECT emptch_id FROM EmployeeTache_emptch WHERE emptch_emp_id = ? AND emptch_tch_id = ?", (employe_id, tache_id))
+    employe_tache = cursor.fetchone()
+    if not employe_tache:
+        conn.close()  # Fermer la connexion
+        return jsonify({'message': 'L\'employé n\'est pas associé à la tâche'}), 404
+
+    # Ajoutez l'enregistrement dans la table Temps_tmp
+    cursor.execute("INSERT INTO Temps_tmp (tmp_emptch_id, tmp_heuresTravaille, tmp_dateTravaille) VALUES (?, ?, ?)",
+                   (employe_tache[0], temps_ajoute, formatted_date))
+
+
+    # Commit pour enregistrer les changements dans la base de données
+    conn.commit()
+    conn.close()  # Fermer la connexion
+
+    return jsonify({'message': 'Temps ajouté avec succès'})
+
+
 
 @app.route('/add_employe_to_tache', methods=['POST'])
 def add_employe_to_tache():

@@ -73,14 +73,13 @@
         ondrop="drop(event)"
         ondragover="allowDrop(event)"
       >
-      {% if session.get('role') == 1 or session.get('role') == 2 %}
+        {% if session.get('role') == 1 or session.get('role') == 2 %}
         <button class="add-button" onclick="showTaskForm()">+</button>
-      {% endif %}
+        {% endif %}
         <div id="task-form-container" style="display: none"></div>
 
         <!-- Affichage dynamique des taches -->
-        {% for tache in taches %}
-
+        {% for tache in taches %} {% if tache[2] == "À faire" %}
         <div
           class="task"
           id="task{{ tache[0] }}"
@@ -96,8 +95,7 @@
           <p>Statut: {{ tache[2] }}</p>
           <div class="icons">👤👤👤</div>
         </div>
-
-        {% endfor %}
+        {% endif %} {% endfor %}
       </div>
 
       <div
@@ -106,9 +104,25 @@
         ondrop="drop(event)"
         ondragover="allowDrop(event)"
       >
-      {% if session.get('role') == 1 or session.get('role') == 2 %}
-      <button class="add-button" onclick="showTaskForm()">+</button>
-      {% endif %}
+        {% if session.get('role') == 1 or session.get('role') == 2 %}
+        <button class="add-button" onclick="showTaskForm()">+</button>
+        {% endif %} {% for tache in taches %} {% if tache[2] == "En Cours" %}
+        <div
+          class="task"
+          id="task{{ tache[0] }}"
+          draggable="true"
+          ondragstart="drag(event)"
+        >
+          <!-- Nom tâche -->
+          <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
+            <p>{{ tache[3] }}</p>
+          </a>
+          <p>Début: {{ tache[4] }}</p>
+          <p>Fin: {{ tache[5] }}</p>
+          <p>Statut: {{ tache[2] }}</p>
+          <div class="icons">👤👤👤</div>
+        </div>
+        {% endif %} {% endfor %}
       </div>
 
       <div
@@ -118,8 +132,24 @@
         ondragover="allowDrop(event)"
       >
         {% if session.get('role') == 1 or session.get('role') == 2 %}
-          <button class="add-button" onclick="showTaskForm()">+</button>
-        {% endif %}
+        <button class="add-button" onclick="showTaskForm()">+</button>
+        {% endif %} {% for tache in taches %} {% if tache[2] == "Termine" %}
+        <div
+          class="task"
+          id="task{{ tache[0] }}"
+          draggable="true"
+          ondragstart="drag(event)"
+        >
+          <!-- Nom tâche -->
+          <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
+            <p>{{ tache[3] }}</p>
+          </a>
+          <p>Début: {{ tache[4] }}</p>
+          <p>Fin: {{ tache[5] }}</p>
+          <p>Statut: {{ tache[2] }}</p>
+          <div class="icons">👤👤👤</div>
+        </div>
+        {% endif %} {% endfor %}
       </div>
     </div>
 
