@@ -134,14 +134,16 @@
           <h4 class="en_cours">EN COURS</h4>
           <h4 class="complete">COMPLÉTÉ</h4>
         </div>
+
         {% for sousTache in sousTaches %}
         <form id="task-update-form" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
-          <input type="hidden" id="task-id-input" name="task_id" value="{{sousTache[0]}}" />
+          <input type="hidden" id="task-id-input" name="task_id" value="{{ sousTache[0] }}" />
           <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
           <input type="hidden" id="task-status-input" name="task_status" />
 
           <input type="hidden" id="proj" name="proj"  />
         {% endfor %}
+
         </form>
         <div class="tasks-container row">
           <div
@@ -161,7 +163,7 @@
        
                 {% if sousTache[2] == "À faire" %}
                     <div class="task"
-                         id="task{{ tache[0] }}"
+                         id="task{{ sousTache[0] }}"
                          draggable="true"
                          ondragstart="drag(event)">
                         <!-- Nom tâche -->
@@ -182,7 +184,7 @@
           </div>
     
           <div
-            data-column="2"
+            data-column="3"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
@@ -197,7 +199,7 @@
      
               {% if sousTache[2] == "En Cours" %}
                   <div class="task"
-                       id="task{{ tache[0] }}"
+                       id="task{{ sousTache[0] }}"
                        draggable="true"
                        ondragstart="drag(event)">
                       <!-- Nom tâche -->
@@ -215,7 +217,7 @@
           </div>
     
           <div
-            data-column="3"
+            data-column="2"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
@@ -230,7 +232,7 @@
      
               {% if sousTache[2] == "Termine" %}
                   <div class="task"
-                       id="task{{ tache[0] }}"
+                       id="task{{ sousTache[0] }}"
                        draggable="true"
                        ondragstart="drag(event)">
                       <!-- Nom tâche -->
@@ -400,27 +402,37 @@
             }
           }
     
-          // Fonction pour gérer le dépôt de l'élément
-          function drop(ev) {
-            ev.preventDefault(); // Empêche l'action par défaut
-            var data = ev.dataTransfer.getData("text");
-            var draggedElement = document.getElementById(data); // Récupère l'élément dragué
-            ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
-    
-           // Vérifiez que la cible est une zone valide (par exemple, une colonne)
-          if (ev.target.classList.contains("column")) {
-            ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
-          }
+          // Function to handle the drop event
+function drop(ev) {
+  ev.preventDefault(); // Prevent the default action
 
-            // Préparer les données à envoyer
-            const column = ev.target.getAttribute("data-column"); // Identifiant de la colonne (statut)
-            
-            // Mettre à jour la position avec le formulaire invisible
-            document.getElementById("task-status-input").value = column;
-            document.getElementById("proj").value = "{{ projet[0] }}";
+  // Get the ID of the dragged element
+  var data = ev.dataTransfer.getData("text");
+  var draggedElement = document.getElementById(data); // Get the dragged element
 
-            document.getElementById("task-update-form").submit();
-          }
+  // Check if the target is a valid drop zone (e.g., a column)
+  if (ev.target.classList.contains("column")) {
+    ev.target.appendChild(draggedElement); // Add the element to the drop zone
+  }
+
+  // Get the column identifier (status)
+  const column = ev.target.getAttribute("data-column");
+
+  // Extract the sousTache ID from the dragged element's ID
+  const sousTacheId = draggedElement.id.replace('task', ''); // Remove 'task' to get the ID
+  
+  // Log or use the sousTacheId as needed
+  console.log('Dropped sousTache ID:', sousTacheId);
+
+  // Set the value for the hidden input field in the form
+  document.getElementById("task-status-input").value = column;
+  document.getElementById("task-id-input").value = sousTacheId; // Set the sousTache ID
+  document.getElementById("proj").value = "{{ projet[0] }}";
+
+  // Submit the form
+  document.getElementById("task-update-form").submit();
+}
+
         </script>
 
 <script>

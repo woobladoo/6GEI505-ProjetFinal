@@ -211,14 +211,10 @@ def get_soustaches_by_tache(task_id):
         if employes_ids:
             taches[i] = taches[i][:6] + (employes_ids.split(','),)  # Replace the 7th element with the list of IDs
     
-    print("Processed tasks:", taches)  # Debug line to verify the modified query output
+   
     conn.close()
     
     return taches
-
-
-
-
 
 
 def get_tache_by_id(task_id):
@@ -728,36 +724,35 @@ def visualization(project_id):
 
 @app.route('/update_task', methods=['POST'])
 def update_task():
-    if request.method == 'POST':
-        print(request.form)
-        sous_tache_id = request.form['task_id']
-        tache_id = request.form['tache_id']
-        new_status = request.form['task_status']
-        projet_id = request.form['proj']
-        
+    print(request.form)
+    sous_tache_id = request.form.get('task_id')
+    tache_id = request.form.get('tache_id')
+    new_status = request.form.get('task_status')
+    projet_id = request.form.get('proj')
 
-        if not sous_tache_id or not new_status:
-            return "Données invalides", 400
+    # Validate inputs
+    if not sous_tache_id or not new_status or not projet_id or not tache_id:
+        return "Données invalides", 400
 
-        try:
-            # Connexion à la base de données
-            conn = get_db()
+    try:
+        # Connexion à la base de données avec un gestionnaire de contexte
+        with get_db() as conn:
             cursor = conn.cursor()
-
             # Mise à jour du statut
             cursor.execute("""
-                UPDATE Tache_tch SET tch_etat_etat = ? WHERE tch_id = ?
+                UPDATE Tache_tch
+                SET tch_etat_etat = ?
+                WHERE tch_id = ?
             """, (new_status, sous_tache_id))
             conn.commit()
-            conn.close()
 
-            # Redirection après mise à jour
-            return redirect(url_for('tache',proj_id = projet_id, task_id=tache_id))
-        except Exception as e:
-            return f"Erreur : {str(e)}", 500
-        
-    return redirect(url_for('tache',proj_id = projet_id, task_id=tache_id))
+        # Redirection après mise à jour
+        return redirect(url_for('tache', proj_id=projet_id, task_id=tache_id))
 
+    except Exception as e:
+        # Log the error in production (don't expose it to users)
+        app.logger.error(f"Database update failed: {e}")
+        return "Erreur interne du serveur", 500
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask
