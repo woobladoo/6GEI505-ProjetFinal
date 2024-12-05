@@ -429,3 +429,16 @@ body {
     margin-bottom: 10px; /* Espacement sous chaque titre */
   }
 }
+
+.vis-button {
+  background-color: #5f5fc4;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.vis-button:hover {
+  background-color: #4c4ca1;
+}

@@ -1,0 +1,88 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+/* Container Styles */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+header nav a {
+    text-decoration: none;
+    color: #666;
+    margin: 0 10px;
+    font-size: 1rem;
+}
+
+header nav a:hover {
+    color: #333;
+}
+
+/* Timeline Styles */
+.timeline {
+    margin-top: 20px;
+    position: relative; /* Enable positioning of child elements */
+    height: 300px; /* Adjust based on your needs */
+    border-left: none; /* Add a timeline indicator if needed */
+}
+
+.bar {
+    height: 30px;
+    border-radius: 5px;
+    line-height: 30px;
+    text-align: center;
+    color: #fff;
+    position: absolute; /* Enable free positioning */
+    top: 0; /* Default value, can be overridden dynamically */
+}
+
+/* Bar Colors */
+.project-bar {
+    background-color: #9ac9fa;
+    width: 100%; /* Full width for the project bar */
+    left: 0;
+}
+
+.task-bar {
+    background-color: #f8b8b8;
+}
+
+.sub-task-bar {
+    background-color: #f8d3b8;
+}
+
+/* Example Styling for Buttons */
+button {
+    padding: 10px 20px;
+    background-color: #6a1b9a; /* Change color as desired */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5e35b1; /* Darker shade for hover effect */
+}

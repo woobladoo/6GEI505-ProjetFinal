@@ -1,5 +1,5 @@
 from flask import Flask, request, url_for, redirect, render_template, session, flash, jsonify ##import de la classe flask et de certaines fonctions utiles
-from datetime import date
+from datetime import datetime, date
 from collections import namedtuple
 import sqlite3
 
@@ -50,7 +50,63 @@ def get_employes():
     cursor.execute("SELECT emp_id AS id, emp_prenom AS prenom, emp_nom AS nom, emp_courriel AS courriel, emp_telephone AS telephone, emp_role_id AS idRole FROM Employee_emp;")  # Adjust columns as needed
     employes = cursor.fetchall()
     conn.close()
+    
     return employes
+
+def get_emp_id_for_task(emptch_tch_id):
+    conn = get_db() 
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT emptch_emp_id
+        FROM EmployeeTache_emptch
+        WHERE emptch_tch_id = ?;
+    """, (emptch_tch_id,))
+    
+    results = cursor.fetchall()  
+    
+    conn.close()
+    
+    if results:
+        # Extract the emp_id values from each row and return as a list
+        emp_ids = [row[0] for row in results]
+        return emp_ids  # Returns a list of emp_ids
+    else:
+        return []  # Returns an empty list if no matching emp_ids are found
+
+
+import sqlite3
+
+def get_temps_total(task_id):
+    
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        # Exécution de la requête SQL pour calculer le temps total pour la tâche spécifiée
+        cursor.execute("""
+            SELECT SUM(tmp_heuresTravaille)
+            FROM Temps_tmp
+            JOIN EmployeeTache_emptch ON temps_tmp.tmp_emptch_id = EmployeeTache_emptch.emptch_id
+            WHERE EmployeeTache_emptch.emptch_tch_id = ?
+        """, (task_id,))
+
+        # Récupération du résultat
+        total_time = cursor.fetchone()[0]
+
+        # Fermeture de la connexion
+        conn.close()
+
+        # Si aucun résultat n'est trouvé, on retourne None
+        if total_time is None:
+            return 0  # ou `None` si vous préférez indiquer que la tâche n'a pas été trouvée
+
+        return total_time
+
+    except sqlite3.Error as e:
+        print(f"Erreur lors de l'accès à la base de données: {e}")
+        return None
+
 
 def get_projets():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -127,26 +183,43 @@ def get_taches_by_project(proj_id):
     return taches
 
 def get_soustaches_by_tache(task_id):
-    conn = sqlite3.connect(DB)  # Connect to the database
+    conn = sqlite3.connect(DB)
     cursor = conn.cursor()
     
     query = """
     SELECT 
         Tache_tch.tch_id AS id, 
         Tache_tch.tch_proj_id AS projet_id, 
-        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Etat_etat.etat_nom AS statut,
         Tache_tch.tch_nom AS nom, 
         Tache_tch.tch_dateDebut AS dateDebut, 
-        Tache_tch.tch_dateFin AS dateFin
+        Tache_tch.tch_dateFin AS dateFin,
+        GROUP_CONCAT(EmployeeTache_emptch.emptch_emp_id) AS employes_ids
     FROM Tache_tch
-    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id
+    LEFT JOIN EmployeeTache_emptch ON Tache_tch.tch_id = EmployeeTache_emptch.emptch_tch_id
     WHERE Tache_tch.tch_parent = ?
+    GROUP BY Tache_tch.tch_id, Tache_tch.tch_proj_id, Etat_etat.etat_nom, Tache_tch.tch_nom, Tache_tch.tch_dateDebut, Tache_tch.tch_dateFin
     """
+    
     cursor.execute(query, (task_id,))
     taches = cursor.fetchall()
+    
+    # Convert the 'employes_ids' field from a comma-separated string to a list
+    for i in range(len(taches)):
+        employes_ids = taches[i][6]
+        if employes_ids:
+            taches[i] = taches[i][:6] + (employes_ids.split(','),)  # Replace the 7th element with the list of IDs
+    
+    print("Processed tasks:", taches)  # Debug line to verify the modified query output
     conn.close()
     
     return taches
+
+
+
+
+
 
 def get_tache_by_id(task_id):
     conn = sqlite3.connect(DB)  # Connect to the database
@@ -189,8 +262,28 @@ def get_tache_by_id(task_id):
     else:
         tache = None  # Explicitly set to None if no task is found
 
-    print("Tache:", tache)
+   
     return tache
+
+
+def utilisateur_assigne_tache(user_id, task_id):
+    
+    conn = sqlite3.connect(DB) # Connect to DB
+    cursor = conn.cursor()
+
+    # Requête pour vérifier l'association de l'utilisateur à la tâche
+    query = """
+    SELECT 1
+    FROM EmployeeTache_emptch
+    WHERE emptch_emp_id = ? AND emptch_tch_id = ?
+    """
+    
+    cursor.execute(query, (user_id, task_id))
+    result = cursor.fetchone()
+    conn.close()
+
+    # Retourne True si un résultat est trouvé, sinon False
+    return result is not None
 
 def get_clients():
     conn = sqlite3.connect(DB) # Connect to DB
@@ -206,7 +299,6 @@ def get_clients():
     '''
     cursor.execute(query)
     clients = cursor.fetchall()
-    print(clients)
     conn.close
     return clients
 
@@ -223,7 +315,7 @@ def get_gestionnaires():
     '''
     cursor.execute(query)
     gestionnaires = cursor.fetchall()
-    print(gestionnaires)
+    
     conn.close
     return gestionnaires
 
@@ -279,6 +371,7 @@ def projet(id):
         return "Project not found", 404  # Or render a custom 404 page
     
     taches = get_taches_by_project(id)
+    print(taches)
 
     # Rendre la page avec les détails du projet
     return render_template('projet.html', projet=projet, taches=taches)
@@ -287,6 +380,11 @@ def projet(id):
 
 @app.route('/projet/<int:proj_id>/tache/<int:task_id>', methods=['GET', 'POST'])
 def tache(proj_id, task_id):
+    username = session.get('username')
+    user = get_user(username)
+    if not user:
+        return "User not found", 404
+
     projet = get_projet_by_id(proj_id)
     if projet is None:
         return "Project not found", 404  # Or render a custom 404 page
@@ -296,17 +394,18 @@ def tache(proj_id, task_id):
         return "Task not found", 404  # Or render a custom 404 page
     
     sousTaches = get_soustaches_by_tache(task_id)
+    
+
+    temps = get_temps_total(task_id)
 
     listeEmploye = get_employes()
+    employesSurTache = get_emp_id_for_task(task_id)
 
-    print("Taches data:", tache)  # Debug print to see the data structure
-
-    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye)
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye, user=user, temps=temps, employesSurTache = employesSurTache)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
     data = request.json
-    print(data)
     name = data.get('name')
     start = data.get('start')
     end = data.get('end')
@@ -332,14 +431,20 @@ def delete_tache(tacheid, projid):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Execute DELETE statement to remove the task by its ID
+    # First, delete all sub-tasks linked to the task
+    cursor.execute("DELETE FROM Tache_tch WHERE tch_parent = ?", (tacheid,))
+
+    # Then, delete the task itself
     cursor.execute("DELETE FROM Tache_tch WHERE tch_id = ?", (tacheid,))
+
+    # Commit the changes to the database
     conn.commit()
     conn.close()
 
-    # Redirect to the project or task page (depending on how you want to handle it)
-    flash('Task deleted successfully', 'success')
+    # Redirect to the project page or task list
+    #flash('Task and all associated sub-tasks deleted successfully', 'success')
     return redirect(url_for('projet', id=projid))  # Redirect to the project page, adjust as needed
+
 
 
 @app.route('/add_projet', methods=['GET', 'POST'])
@@ -381,10 +486,18 @@ def delete_projet(projet_id):
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
 
-    # First, delete all tasks related to the project
+    # First, delete all sub-tasks linked to the tasks of the project
+    cursor.execute("""
+        DELETE FROM Tache_tch 
+        WHERE tch_parent IN (
+            SELECT tch_id FROM Tache_tch WHERE tch_proj_id = ?
+        )
+    """, (projet_id,))
+
+    # Then, delete all tasks directly linked to the project
     cursor.execute("DELETE FROM Tache_tch WHERE tch_proj_id = ?", (projet_id,))
-    
-    # Now, delete the project itself
+
+    # Finally, delete the project itself
     cursor.execute("DELETE FROM Projet_proj WHERE proj_id = ?", (projet_id,))
 
     # Commit the changes to the database
@@ -392,8 +505,9 @@ def delete_projet(projet_id):
     conn.close()
 
     # Redirect to the project list or another page
-    flash('Project and all associated tasks deleted successfully', 'success')
+    #flash('Project, all associated tasks, and sub-tasks deleted successfully', 'success')
     return redirect(url_for('listeProjets'))  # Adjust redirection as necessary
+
 
 
 @app.route('/delete_employee/<int:employee_id>', methods=['POST'])
@@ -418,13 +532,7 @@ def update_profile():
     courriel = request.form['courriel']
     telephone = request.form['telephone']
     role = request.form['role']
-    print(user[0]['emp_id'])
-    print(prenom)
-    print(nom)
-    print(courriel)
-    print(telephone)
-    print(role)
-
+   
     conn = get_db()
     cursor = conn.cursor()
 
@@ -479,50 +587,177 @@ def inscription():
 
     return render_template('inscription.html')
 
+@app.route('/ajouter_temps', methods=['POST'])
+def ajouter_temps():
+
+    # Récupération des données du formulaire
+    data = request.get_json()
+    tache_id = data.get('tache_id')
+    temps_ajoute = int(data.get('temps_ajoute', 0))
+    employe_id = int(data.get('employe_id', 0))
+    now = datetime.now()
+    formatted_date = now.strftime("%Y-%m-%d")
+
+    # Connexion à la base de données SQLite
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+
+
+    # Vérifiez si l'employé est bien associé à la tâche dans la table EmployeeTache_emptch
+    print(f"Données reçues: {data}")
+    cursor.execute("SELECT emptch_id FROM EmployeeTache_emptch WHERE emptch_emp_id = ? AND emptch_tch_id = ?", (employe_id, tache_id))
+    employe_tache = cursor.fetchone()
+    if not employe_tache:
+        conn.close()  # Fermer la connexion
+        return jsonify({'message': 'L\'employé n\'est pas associé à la tâche'}), 404
+
+    # Ajoutez l'enregistrement dans la table Temps_tmp
+    cursor.execute("INSERT INTO Temps_tmp (tmp_emptch_id, tmp_heuresTravaille, tmp_dateTravaille) VALUES (?, ?, ?)",
+                   (employe_tache[0], temps_ajoute, formatted_date))
+
+
+    # Commit pour enregistrer les changements dans la base de données
+    conn.commit()
+    conn.close()  # Fermer la connexion
+
+    return jsonify({}), 200  
+
+
+
 @app.route('/add_employe_to_tache', methods=['POST'])
 def add_employe_to_tache():
-    try:
-        # Récupération des données envoyées par le client
-        data = request.get_json()
-        tache_id = data.get('tache_id')  # ID de la tâche
-        employe_id = data.get('employe_id')  # ID de l'employé à associer
-
-        # Validation des données
-        if not tache_id or not employe_id:
-            return jsonify({'message': 'Les champs tache_id et employe_id sont requis.'}), 400
-
-        # Connectez-vous à votre base de données (exemple SQLite)
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-
-        # Vérifier si la tâche existe
-        cursor.execute("SELECT tch_id FROM Tache_tch WHERE id = ?", (tache_id,))
-        tache = cursor.fetchone()
-        if not tache:
-            return jsonify({'message': 'Tâche non trouvée.'}), 404
-
-        # Vérifier si l'employé existe
-        cursor.execute("SELECT emp_id FROM Employee_emp WHERE id = ?", (employe_id,))
-        employe = cursor.fetchone()
-        if not employe:
-            return jsonify({'message': 'Employé non trouvé.'}), 404
-
-        # Ajouter la relation tâche-employé dans une table associée (exemple : `taches_employes`)
-        try:
-            # Insérer la relation tâche-employé dans la table
-            cursor.execute("""
-                INSERT INTO EmployeeTache_emptch (emptch_tch_id, emptch_emp_id)
-                VALUES (?, ?)
-            """, (tache_id, employe_id))
-            connection.commit()
-        except sqlite3.Error as e:
-            connection.close()
-            return jsonify({'message': f'Erreur SQL: {str(e)}'}), 500
+    
+    if request.method == 'POST':
+        # Récupération des données du formulaire
+       
+        tache_id = request.form['tache_id']
+        employe_id = request.form.get('employe_id')
+        projet_id = request.form['projet_id']
         
-        return jsonify({'message': 'Employé ajouté à la tâche avec succès.'}), 201
 
+        # Connexion à la base de données et ajout de l'utilisateur
+        conn = sqlite3.connect(DB)
+        cursor = conn.cursor()
+        
+
+        cursor.execute("""
+            SELECT 1 FROM EmployeeTache_emptch 
+            WHERE emptch_emp_id = ? AND emptch_tch_id = ?
+        """, (employe_id, tache_id))
+
+        existing_assignment = cursor.fetchone()
+        if existing_assignment:
+            # If the employee is already assigned to the task, flash a message
+            flash("Cet employé est déjà associé à cette tâche.", "error")
+            conn.close()
+            return redirect(url_for('tache', proj_id=projet_id, task_id=tache_id))
+        
+
+       
+        try:
+            query ='INSERT INTO EmployeeTache_emptch (emptch_emp_id, emptch_tch_id) VALUES (?, ?);'
+            cursor.execute(query, (employe_id, tache_id))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            flash("Cette personne est deja sur cette tache", "error")
+            return redirect(url_for('tache',proj_id = projet_id, task_id= tache_id, projet=projet, tache=tache))
+        finally:
+            conn.close()
+        
+
+        flash("Utilisateur ajouté avec succès", "success")
+        return redirect(url_for('tache',proj_id = projet_id, task_id= tache_id, projet=projet, tache=tache))
+
+    return render_template('taches.html',proj_id = projet_id, task_id= tache_id, projet=projet, tache=tache)
+
+@app.route('/delete_employee_tache', methods=['POST'])
+def delete_employee_tache():
+    # Récupérer les données du formulaire
+    employee_tache_id = request.form['employee_tache_id']
+    tache_id = request.form['tach']
+    projet_id = request.form['proj']
+    employee_tch = employee_tache_id.split(' ',1)[0]
+    # Affichage dans la console pour le débogage (optionnel)
+    print(f"Supprimer l'employé avec l'ID {employee_tch} de la tâche {tache_id}")
+
+    # Connexion à la base de données
+    conn = sqlite3.connect(DB)
+    cursor = conn.cursor()
+
+    try:
+        # Exécuter la requête SQL pour supprimer l'employé de la tâche
+        query = 'DELETE FROM EmployeeTache_emptch WHERE emptch_emp_id = (Select emp_id from Employee_emp where emp_prenom = ?);'
+        cursor.execute(query, (employee_tch,))  # L'ID de l'employé et l'ID de la tâche
+        conn.commit()
+
+        # Message flash pour l'utilisateur (facultatif)
+        flash("Employé supprimé de la tâche avec succès.", "success")
+    
     except Exception as e:
-        return jsonify({'message': f'Erreur lors de l’ajout de l’employé : {str(e)}'}), 500
+        # Si une erreur survient, message d'erreur (facultatif)
+        flash("Erreur lors de la suppression de l'employé de la tâche.", "error")
+        print(f"Error: {e}")
+    
+    finally:
+        # Fermer la connexion à la base de données
+        conn.close()
+
+    # Rediriger l'utilisateur vers la page de la tâche ou autre page appropriée
+    return redirect(url_for('tache', proj_id=projet_id, task_id=tache_id))
+
+@app.route('/visualization/<int:project_id>')
+def visualization(project_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Fetch project tasks and sub-tasks
+    cursor.execute("""
+        SELECT tch_id, tch_nom, tch_parent, tch_dateDebut, tch_dateFin 
+        FROM Tache_tch 
+        WHERE tch_proj_id = ? 
+        ORDER BY tch_parent ASC, tch_dateDebut ASC
+    """, (project_id,))
+    tasks = cursor.fetchall()
+
+    projet = get_projet_by_id(project_id)
+
+    conn.close()
+
+    # Pass data to the template
+    return render_template('visualization.html', projet=projet, tasks=tasks)
+
+@app.route('/update_task', methods=['POST'])
+def update_task():
+    if request.method == 'POST':
+        print(request.form)
+        sous_tache_id = request.form['task_id']
+        tache_id = request.form['tache_id']
+        new_status = request.form['task_status']
+        projet_id = request.form['proj']
+        
+
+        if not sous_tache_id or not new_status:
+            return "Données invalides", 400
+
+        try:
+            # Connexion à la base de données
+            conn = get_db()
+            cursor = conn.cursor()
+
+            # Mise à jour du statut
+            cursor.execute("""
+                UPDATE Tache_tch SET tch_etat_etat = ? WHERE tch_id = ?
+            """, (new_status, sous_tache_id))
+            conn.commit()
+            conn.close()
+
+            # Redirection après mise à jour
+            return redirect(url_for('tache',proj_id = projet_id, task_id=tache_id))
+        except Exception as e:
+            return f"Erreur : {str(e)}", 500
+        
+    return redirect(url_for('tache',proj_id = projet_id, task_id=tache_id))
+
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask

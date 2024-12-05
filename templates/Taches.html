@@ -52,10 +52,11 @@
         <div class="part3">
           <p>Début: {{ tache[4] }}</p>
           <p>Fin: {{ tache[5] }}</p>
+          <p>Temps total: {{ temps }}h </p>
         </div>
     
         <div class="column2">
-          <button type="button" class="btn btn-secondary">
+          <button type="button" onclick="showAddTime()" class="btn btn-secondary">
             Ajouter du temps
           </button>
           <button type="button" onclick="showAddEmployeForm()" class="btn btn-primary">
@@ -87,10 +88,22 @@
         {% if tache and tache['employes'] %}
           {% for employe in tache['employes'] %}
             <p>
-              <a href="#" class="user-icon">
-                <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
-              </a>
-              {{ employe }}
+              
+              <form action="/delete_employee_tache" method="POST" style="display:inline;"><!-- Champs cachés pour envoyer l'ID de l'employé, de la tâche et du projet -->
+                <a href="#" class="user-icon">
+                  <img src="{{ url_for('static', filename='images/icon_utiliateur.jpg') }}" alt="User Icon" width="40" height="40" />
+                </a>
+                {{ employe }}
+                  <input type="hidden" name="employee_tache_id" value="{{ employe}}"> <!-- ID de l'employé -->
+                  <input type="hidden" name="tach" value="{{ tache[0] }}"> <!-- ID de la tâche -->
+                  <input type="hidden" name="proj" value="{{ projet[0] }}"> <!-- ID du projet -->
+                  {% if session.get('role') == 1 %}
+                  <!-- Bouton poubelle pour supprimer l'employé -->
+                  <button type="submit" class="btn btn-danger">
+                      <i class="fas fa-trash"></i> Supprimer de la tâche
+                  </button>
+                  {% endif %}
+              </form>
             </p>
           {% endfor %}
         {% else %}
@@ -98,7 +111,17 @@
         {% endif %}
       </div>
       
-      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+      {% endwith %}
       
 
       </div>
@@ -111,71 +134,152 @@
           <h4 class="en_cours">EN COURS</h4>
           <h4 class="complete">COMPLÉTÉ</h4>
         </div>
+        {% for sousTache in sousTaches %}
+        <form id="task-update-form" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
+          <input type="hidden" id="task-id-input" name="task_id" value="{{sousTache[0]}}" />
+          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+          <input type="hidden" id="task-status-input" name="task_status" />
 
+          <input type="hidden" id="proj" name="proj"  />
+        {% endfor %}
+        </form>
         <div class="tasks-container row">
           <div
+            data-column="1"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-            <button class="add-button" onclick="showTaskForm()">+</button>
+          {% if session.get('role') == 1 or session.get('role') == 2 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
             <div id="task-form-container" style="display: none"></div>
-    
-            <!-- Affichage dynamique des taches -->
+            
             {% for sousTache in sousTaches %}
-    
-            <div
-              class="task"
-              id="task{{ tache[0] }}"
-              draggable="true"
-              ondragstart="drag(event)"
-            >
-              <!-- Nom tâche -->
-              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
-                <p>{{ sousTache[3] }}</p>
-              </a>
-              <p>Début: {{ sousTache[4] }}</p>
-              <p>Fin: {{ sousTache[5] }}</p>
-              <p>Statut: {{ sousTache[2] }}</p>
-              <div class="icons">👤👤👤</div>
-            </div>
-    
-            {% endfor %}
+
+            {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
+       
+                {% if sousTache[2] == "À faire" %}
+                    <div class="task"
+                         id="task{{ tache[0] }}"
+                         draggable="true"
+                         ondragstart="drag(event)">
+                        <!-- Nom tâche -->
+                        <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                            <p>{{ sousTache[3] }}</p>
+                        </a>
+                        <p>Début: {{ sousTache[4] }}</p>
+                        <p>Fin: {{ sousTache[5] }}</p>
+                        <p>Statut: {{ sousTache[2] }}</p>
+                        <div class="icons">👤👤👤</div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        
+
+
           </div>
     
           <div
+            data-column="2"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-            <button class="add-button" onclick="showTaskForm()">+</button>
+          {% if session.get('role') == 1 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
+
+          {% for sousTache in sousTaches %}
+
+          {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
+     
+              {% if sousTache[2] == "En Cours" %}
+                  <div class="task"
+                       id="task{{ tache[0] }}"
+                       draggable="true"
+                       ondragstart="drag(event)">
+                      <!-- Nom tâche -->
+                      <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                          <p>{{ sousTache[3] }}</p>
+                      </a>
+                      <p>Début: {{ sousTache[4] }}</p>
+                      <p>Fin: {{ sousTache[5] }}</p>
+                      <p>Statut: {{ sousTache[2] }}</p>
+                      <div class="icons">👤👤👤</div>
+                  </div>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
           </div>
     
           <div
+            data-column="3"
             class="column col-12 col-md-4"
             ondrop="drop(event)"
             ondragover="allowDrop(event)"
           >
-            <button class="add-button" onclick="showTaskForm()">+</button>
+          {% if session.get('role') == 1 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
+
+          {% for sousTache in sousTaches %}
+
+          {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
+     
+              {% if sousTache[2] == "Termine" %}
+                  <div class="task"
+                       id="task{{ tache[0] }}"
+                       draggable="true"
+                       ondragstart="drag(event)">
+                      <!-- Nom tâche -->
+                      <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                          <p>{{ sousTache[3] }}</p>
+                      </a>
+                      <p>Début: {{ sousTache[4] }}</p>
+                      <p>Fin: {{ sousTache[5] }}</p>
+                      <p>Statut: {{ sousTache[2] }}</p>
+                      <div class="icons">👤👤👤</div>
+                  </div>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      
+      
+
+
           </div>
         </div>
 
         <!-- Overlay -->
       <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
 
-      <!-- Formulaire ajout employer -->
-      <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
-
       <div id="add-employe-form" class="modal-custom">
-        <input type="hidden" id="tache-id" value="{{ tache[0] }}" />
-        <label for="employe-id">Employé :</label>
-        <select id="employe-id" class="form-control">
-          {% for employe in employes %}
-          <option value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
-          {% endfor %}
-        </select>
-        <button onclick="addEmployeToTache()" class="btn btn-success mt-2">Associer</button>
-        <button onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
+        <form action="/add_employe_to_tache" method="post">
+          <input type="hidden" name="tache_id" id="tache_id" value="{{ tache[0] }}" />
+          <input type="hidden" name="projet_id" id="projet_id" value="{{ projet[0] }}" />
+          <label for="employe_id">Employé :</label>
+          <select name= "employe_id" id="employe_id" class="form-control">
+            {% for employe in employes %}
+            <option  value="{{ employe[0] }}">{{ employe[1]}} {{ employe[2]}}</option>
+            {% endfor %}
+          </select>
+          <button onclick="hideAddEmployeForm" type="submit" class="btn btn-success mt-2">Associer</button>
+          <button  type="button"  onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
+        </form>
+      </div>
+
+        <!-- Formulaire ajout employer -->
+      <div id="modal-overlay" class="modal-overlay1" style="display: none;" onclick="hideAddTime()"></div>
+
+      <div id="add-time-form" class="modal-custom" style="display: none;">
+        <input type="hidden" id="tache-id1" value="{{ tache[0] }}" />
+        <input type="hidden" id="employe-id1" value= "{{ user[0].emp_id }}" />
+        <label for="temps-ajoute">Temps à ajouter :</label>
+        <input type="number" id="temps-ajoute" placeholder="Temps en heures" required>
+        <button onclick="addTime()" class="btn btn-success mt-2">Ajouter</button>
+        <button onclick="hideAddTime()" class="btn btn-secondary mt-2">Annuler</button>
       </div>
 
 
@@ -186,11 +290,64 @@
             document.getElementById("add-employe-form").style.display = "block";
           }
 
+          function showAddTime() {
+            document.getElementById("modal-overlay").style.display = "block";
+            document.getElementById("add-time-form").style.display = "block";
+          }
+
+          // Cacher le formulaire d'ajout d'employé en popup
+          function hideAddTime() {
+            document.getElementById("modal-overlay").style.display = "none";
+            document.getElementById("add-time-form").style.display = "none";
+          }
+
           // Cacher le formulaire d'ajout d'employé en popup
           function hideAddEmployeForm() {
             document.getElementById("modal-overlay").style.display = "none";
             document.getElementById("add-employe-form").style.display = "none";
           }
+
+
+
+          async function addTime() {
+            const tacheId = document.getElementById("tache-id1").value;
+            const employeId = document.getElementById("employe-id1").value;
+            const tempsAjoute = document.getElementById("temps-ajoute").value;
+            console.log("Valeur de employe-id dans le DOM : ", document.getElementById("employe-id1").value);
+
+            if (!tacheId || !employeId || !tempsAjoute) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/ajouter_temps", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        tache_id: tacheId, 
+                        employe_id: employeId, 
+                        temps_ajoute: tempsAjoute 
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors de l'ajout de temps à l'employé.");
+                }
+
+                const data = await response.json();
+                
+                hideAddTime(); 
+                window.location.reload(); // Recharger la page après succès
+            } catch (error) {
+                console.error(error.message);
+                alert("Une erreur est survenue.");
+                window.location.reload();
+            }
+
+        }
+
+         
 
           // Fonction pour envoyer les données au backend (inchangée)
           async function addEmployeToTache() {
@@ -223,6 +380,8 @@
             }
           }
 
+          
+
         </script>
 
 
@@ -249,9 +408,18 @@
             ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
     
            // Vérifiez que la cible est une zone valide (par exemple, une colonne)
-            if (ev.target.classList.contains("column")) {
-              ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
-            }
+          if (ev.target.classList.contains("column")) {
+            ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
+          }
+
+            // Préparer les données à envoyer
+            const column = ev.target.getAttribute("data-column"); // Identifiant de la colonne (statut)
+            
+            // Mettre à jour la position avec le formulaire invisible
+            document.getElementById("task-status-input").value = column;
+            document.getElementById("proj").value = "{{ projet[0] }}";
+
+            document.getElementById("task-update-form").submit();
           }
         </script>
 
