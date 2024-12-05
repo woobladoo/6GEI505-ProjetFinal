@@ -620,7 +620,7 @@ def ajouter_temps():
     conn.commit()
     conn.close()  # Fermer la connexion
 
-    return jsonify({'message': 'Temps ajouté avec succès'})
+    return jsonify({}), 200  
 
 
 

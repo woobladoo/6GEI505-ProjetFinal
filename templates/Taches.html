@@ -157,7 +157,7 @@
             
             {% for sousTache in sousTaches %}
 
-            {% if user[0][0] | string == sousTache[6][0] | string %}
+            {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
        
                 {% if sousTache[2] == "À faire" %}
                     <div class="task"
@@ -193,7 +193,7 @@
 
           {% for sousTache in sousTaches %}
 
-          {% if user[0][0] | string == sousTache[6][0] | string %}
+          {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
      
               {% if sousTache[2] == "En Cours" %}
                   <div class="task"
@@ -226,9 +226,7 @@
 
           {% for sousTache in sousTaches %}
 
-          {% if user[0][0] | string == sousTache[6][0] | string %}
-          <p>User ID: {{ user[0][0] }}</p>
-<p>Employe IDs in sousTache: {{ sousTache[6][0] }}</p>
+          {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
      
               {% if sousTache[2] == "Termine" %}
                   <div class="task"
@@ -257,9 +255,6 @@
         <!-- Overlay -->
       <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
 
-      <!-- Formulaire ajout employer -->
-      <div id="modal-overlay" class="modal-overlay" onclick="hideAddEmployeForm()"></div>
-
       <div id="add-employe-form" class="modal-custom">
         <form action="/add_employe_to_tache" method="post">
           <input type="hidden" name="tache_id" id="tache_id" value="{{ tache[0] }}" />
@@ -273,9 +268,13 @@
           <button onclick="hideAddEmployeForm" type="submit" class="btn btn-success mt-2">Associer</button>
           <button  type="button"  onclick="hideAddEmployeForm()" class="btn btn-secondary mt-2">Annuler</button>
         </form>
+      </div>
 
-      <div id="add-time-form" class="modal-custom">
-        <input type="hidden" id="tache-id" value="{{ tache[0] }}" />
+        <!-- Formulaire ajout employer -->
+      <div id="modal-overlay" class="modal-overlay1" style="display: none;" onclick="hideAddTime()"></div>
+
+      <div id="add-time-form" class="modal-custom" style="display: none;">
+        <input type="hidden" id="tache-id1" value="{{ tache[0] }}" />
         <input type="hidden" id="employe-id1" value= "{{ user[0].emp_id }}" />
         <label for="temps-ajoute">Temps à ajouter :</label>
         <input type="number" id="temps-ajoute" placeholder="Temps en heures" required>
@@ -311,7 +310,7 @@
 
 
           async function addTime() {
-            const tacheId = document.getElementById("tache-id").value;
+            const tacheId = document.getElementById("tache-id1").value;
             const employeId = document.getElementById("employe-id1").value;
             const tempsAjoute = document.getElementById("temps-ajoute").value;
             console.log("Valeur de employe-id dans le DOM : ", document.getElementById("employe-id1").value);
@@ -337,13 +336,15 @@
                 }
 
                 const data = await response.json();
-                alert(data.message);
-                hideAddTimeForm(); // Fermer le formulaire (si applicable)
+                
+                hideAddTime(); 
                 window.location.reload(); // Recharger la page après succès
             } catch (error) {
                 console.error(error.message);
                 alert("Une erreur est survenue.");
+                window.location.reload();
             }
+
         }
 
          
