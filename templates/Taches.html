@@ -154,29 +154,31 @@
            <button class="add-button" onclick="showTaskForm()">+</button>
           {% endif %}
             <div id="task-form-container" style="display: none"></div>
-    
-            <!-- Affichage dynamique des taches -->
-             
+            
             {% for sousTache in sousTaches %}
-            {% if sousTache[2] == "À faire" %}
-    
-            <div
-              class="task"
-              id="task{{ tache[0] }}"
-              draggable="true"
-              ondragstart="drag(event)"
-            >
-              <!-- Nom tâche -->
-              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
-                <p>{{ sousTache[3] }}</p>
-              </a>
-              <p>Début: {{ sousTache[4] }}</p>
-              <p>Fin: {{ sousTache[5] }}</p>
-              <p>Statut: {{ sousTache[2] }}</p>
-              <div class="icons">👤👤👤</div>
-            </div>
+
+            {% if user[0][0] | string == sousTache[6][0] | string %}
+       
+                {% if sousTache[2] == "À faire" %}
+                    <div class="task"
+                         id="task{{ tache[0] }}"
+                         draggable="true"
+                         ondragstart="drag(event)">
+                        <!-- Nom tâche -->
+                        <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                            <p>{{ sousTache[3] }}</p>
+                        </a>
+                        <p>Début: {{ sousTache[4] }}</p>
+                        <p>Fin: {{ sousTache[5] }}</p>
+                        <p>Statut: {{ sousTache[2] }}</p>
+                        <div class="icons">👤👤👤</div>
+                    </div>
+                {% endif %}
             {% endif %}
-            {% endfor %}
+        {% endfor %}
+        
+
+
           </div>
     
           <div
@@ -190,25 +192,26 @@
           {% endif %}
 
           {% for sousTache in sousTaches %}
-            {% if sousTache[2] == "En Cours" %}
-    
-            <div
-              class="task"
-              id="task{{ tache[0] }}"
-              draggable="true"
-              ondragstart="drag(event)"
-            >
-              <!-- Nom tâche -->
-              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
-                <p>{{ sousTache[3] }}</p>
-              </a>
-              <p>Début: {{ sousTache[4] }}</p>
-              <p>Fin: {{ sousTache[5] }}</p>
-              <p>Statut: {{ sousTache[2] }}</p>
-              <div class="icons">👤👤👤</div>
-            </div>
-            {% endif %}
-            {% endfor %}
+
+          {% if user[0][0] | string == sousTache[6][0] | string %}
+     
+              {% if sousTache[2] == "En Cours" %}
+                  <div class="task"
+                       id="task{{ tache[0] }}"
+                       draggable="true"
+                       ondragstart="drag(event)">
+                      <!-- Nom tâche -->
+                      <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                          <p>{{ sousTache[3] }}</p>
+                      </a>
+                      <p>Début: {{ sousTache[4] }}</p>
+                      <p>Fin: {{ sousTache[5] }}</p>
+                      <p>Statut: {{ sousTache[2] }}</p>
+                      <div class="icons">👤👤👤</div>
+                  </div>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
           </div>
     
           <div
@@ -222,25 +225,32 @@
           {% endif %}
 
           {% for sousTache in sousTaches %}
-            {% if sousTache[2] == "Termine" %}
-    
-            <div
-              class="task"
-              id="task{{ tache[0] }}"
-              draggable="true"
-              ondragstart="drag(event)"
-            >
-              <!-- Nom tâche -->
-              <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
-                <p>{{ sousTache[3] }}</p>
-              </a>
-              <p>Début: {{ sousTache[4] }}</p>
-              <p>Fin: {{ sousTache[5] }}</p>
-              <p>Statut: {{ sousTache[2] }}</p>
-              <div class="icons">👤👤👤</div>
-            </div>
-            {% endif %}
-            {% endfor %}
+
+          {% if user[0][0] | string == sousTache[6][0] | string %}
+          <p>User ID: {{ user[0][0] }}</p>
+<p>Employe IDs in sousTache: {{ sousTache[6][0] }}</p>
+     
+              {% if sousTache[2] == "Termine" %}
+                  <div class="task"
+                       id="task{{ tache[0] }}"
+                       draggable="true"
+                       ondragstart="drag(event)">
+                      <!-- Nom tâche -->
+                      <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                          <p>{{ sousTache[3] }}</p>
+                      </a>
+                      <p>Début: {{ sousTache[4] }}</p>
+                      <p>Fin: {{ sousTache[5] }}</p>
+                      <p>Statut: {{ sousTache[2] }}</p>
+                      <div class="icons">👤👤👤</div>
+                  </div>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      
+      
+
+
           </div>
         </div>
 

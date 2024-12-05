@@ -1,4 +1,3 @@
--- 2. Mettre à jour le nom d'état
-UPDATE Etat_etat
-SET etat_nom = 'À faire'
-WHERE etat_id = 1;
+UPDATE Tache_tch
+SET tch_etat_etat = 3
+WHERE tch_id = 7;  -- Remplacez "Ancienne valeur" par la valeur que vous voulez modifier

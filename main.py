@@ -53,6 +53,28 @@ def get_employes():
     
     return employes
 
+def get_emp_id_for_task(emptch_tch_id):
+    conn = get_db() 
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT emptch_emp_id
+        FROM EmployeeTache_emptch
+        WHERE emptch_tch_id = ?;
+    """, (emptch_tch_id,))
+    
+    results = cursor.fetchall()  
+    
+    conn.close()
+    
+    if results:
+        # Extract the emp_id values from each row and return as a list
+        emp_ids = [row[0] for row in results]
+        return emp_ids  # Returns a list of emp_ids
+    else:
+        return []  # Returns an empty list if no matching emp_ids are found
+
+
 import sqlite3
 
 def get_temps_total(task_id):
@@ -161,26 +183,43 @@ def get_taches_by_project(proj_id):
     return taches
 
 def get_soustaches_by_tache(task_id):
-    conn = sqlite3.connect(DB)  # Connect to the database
+    conn = sqlite3.connect(DB)
     cursor = conn.cursor()
     
     query = """
     SELECT 
         Tache_tch.tch_id AS id, 
         Tache_tch.tch_proj_id AS projet_id, 
-        Etat_etat.etat_nom AS statut,  -- Get the status name instead of its ID
+        Etat_etat.etat_nom AS statut,
         Tache_tch.tch_nom AS nom, 
         Tache_tch.tch_dateDebut AS dateDebut, 
-        Tache_tch.tch_dateFin AS dateFin
+        Tache_tch.tch_dateFin AS dateFin,
+        GROUP_CONCAT(EmployeeTache_emptch.emptch_emp_id) AS employes_ids
     FROM Tache_tch
-    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id  -- Join with the Etat_etat table
+    LEFT JOIN Etat_etat ON Tache_tch.tch_etat_etat = Etat_etat.etat_id
+    LEFT JOIN EmployeeTache_emptch ON Tache_tch.tch_id = EmployeeTache_emptch.emptch_tch_id
     WHERE Tache_tch.tch_parent = ?
+    GROUP BY Tache_tch.tch_id, Tache_tch.tch_proj_id, Etat_etat.etat_nom, Tache_tch.tch_nom, Tache_tch.tch_dateDebut, Tache_tch.tch_dateFin
     """
+    
     cursor.execute(query, (task_id,))
     taches = cursor.fetchall()
+    
+    # Convert the 'employes_ids' field from a comma-separated string to a list
+    for i in range(len(taches)):
+        employes_ids = taches[i][6]
+        if employes_ids:
+            taches[i] = taches[i][:6] + (employes_ids.split(','),)  # Replace the 7th element with the list of IDs
+    
+    print("Processed tasks:", taches)  # Debug line to verify the modified query output
     conn.close()
     
     return taches
+
+
+
+
+
 
 def get_tache_by_id(task_id):
     conn = sqlite3.connect(DB)  # Connect to the database
@@ -355,14 +394,14 @@ def tache(proj_id, task_id):
         return "Task not found", 404  # Or render a custom 404 page
     
     sousTaches = get_soustaches_by_tache(task_id)
+    
 
     temps = get_temps_total(task_id)
 
     listeEmploye = get_employes()
-    
+    employesSurTache = get_emp_id_for_task(task_id)
 
-
-    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye, user=user, temps=temps)
+    return render_template('Taches.html', projet=projet, tache=tache, sousTaches = sousTaches,employes=listeEmploye, user=user, temps=temps, employesSurTache = employesSurTache)
 
 @app.route('/add_tache', methods=['POST'])
 def add_tache():
