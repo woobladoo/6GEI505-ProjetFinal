@@ -753,6 +753,37 @@ def update_task():
         # Log the error in production (don't expose it to users)
         app.logger.error(f"Database update failed: {e}")
         return "Erreur interne du serveur", 500
+    
+@app.route('/update_tasks', methods=['POST'])
+def update_tasks():
+    print(request.form)
+    tache_id = request.form.get('tache_id')
+    new_status = request.form.get('task_status')
+    projet_id = request.form.get('proj')
+
+    # Validate inputs
+    if  not new_status or not projet_id or not tache_id:
+        return "Données invalides", 400
+
+    try:
+        # Connexion à la base de données avec un gestionnaire de contexte
+        with get_db() as conn:
+            cursor = conn.cursor()
+            # Mise à jour du statut
+            cursor.execute("""
+                UPDATE Tache_tch
+                SET tch_etat_etat = ?
+                WHERE tch_id = ?
+            """, (new_status, tache_id))
+            conn.commit()
+
+        # Redirection après mise à jour
+        return redirect(url_for('projet', id=projet_id))
+
+    except Exception as e:
+        # Log the error in production (don't expose it to users)
+        app.logger.error(f"Database update failed: {e}")
+        return "Erreur interne du serveur", 500
 
 
 if __name__ == '__main__':        ##Permet de lancer notre site web flask

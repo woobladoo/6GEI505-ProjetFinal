@@ -62,9 +62,7 @@
           <button type="button" onclick="showAddEmployeForm()" class="btn btn-primary">
             Ajouter employé
           </button>
-          <button type="button" class="btn btn-light">
-            Modifier statut
-          </button>
+          
         </div>
       </div>
     </div>
@@ -135,15 +133,6 @@
           <h4 class="complete">COMPLÉTÉ</h4>
         </div>
 
-        {% for sousTache in sousTaches %}
-        <form id="task-update-form" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
-          <input type="hidden" id="task-id-input" name="task_id" value="{{ sousTache[0] }}" />
-          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
-          <input type="hidden" id="task-status-input" name="task_status" />
-
-          <input type="hidden" id="proj" name="proj"  />
-        {% endfor %}
-
         </form>
         <div class="tasks-container row">
           <div
@@ -166,6 +155,13 @@
                          id="task{{ sousTache[0] }}"
                          draggable="true"
                          ondragstart="drag(event)">
+                         <form id="task-update-form-{{ sousTache[0] }}" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
+                          <input type="hidden" id="task-id-input" name="task_id" value ="{{ sousTache[0] }}" />
+                          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+                          <input type="hidden" id="task-status-input-{{ sousTache[0] }}" name="task_status" />
+            
+                          <input type="hidden" id="proj" name="proj" value="{{ projet[0] }}" />
+                        </form>
                         <!-- Nom tâche -->
                         <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
                             <p>{{ sousTache[3] }}</p>
@@ -181,39 +177,6 @@
         
 
 
-          </div>
-    
-          <div
-            data-column="3"
-            class="column col-12 col-md-4"
-            ondrop="drop(event)"
-            ondragover="allowDrop(event)"
-          >
-          {% if session.get('role') == 1 %}
-           <button class="add-button" onclick="showTaskForm()">+</button>
-          {% endif %}
-
-          {% for sousTache in sousTaches %}
-
-          {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
-     
-              {% if sousTache[2] == "En Cours" %}
-                  <div class="task"
-                       id="task{{ sousTache[0] }}"
-                       draggable="true"
-                       ondragstart="drag(event)">
-                      <!-- Nom tâche -->
-                      <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
-                          <p>{{ sousTache[3] }}</p>
-                      </a>
-                      <p>Début: {{ sousTache[4] }}</p>
-                      <p>Fin: {{ sousTache[5] }}</p>
-                      <p>Statut: {{ sousTache[2] }}</p>
-                      <div class="icons">👤👤👤</div>
-                  </div>
-              {% endif %}
-          {% endif %}
-      {% endfor %}
           </div>
     
           <div
@@ -235,13 +198,60 @@
                        id="task{{ sousTache[0] }}"
                        draggable="true"
                        ondragstart="drag(event)">
+                       <form id="task-update-form-{{ sousTache[0] }}" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
+                        <input type="hidden" id="task-id-input" name="task_id" value ="{{ sousTache[0] }}" />
+                        <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+                        <input type="hidden" id="task-status-input-{{ sousTache[0] }}" name="task_status" />
+          
+                        <input type="hidden" id="proj" name="proj" value="{{ projet[0] }}" />
+                      </form>
                       <!-- Nom tâche -->
                       <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
                           <p>{{ sousTache[3] }}</p>
                       </a>
                       <p>Début: {{ sousTache[4] }}</p>
                       <p>Fin: {{ sousTache[5] }}</p>
-                      <p>Statut: {{ sousTache[2] }}</p>
+                      <p>Statut: En Cours</p>
+                      <div class="icons">👤👤👤</div>
+                  </div>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+          </div>
+    
+          <div
+            data-column="3"
+            class="column col-12 col-md-4"
+            ondrop="drop(event)"
+            ondragover="allowDrop(event)"
+          >
+          {% if session.get('role') == 1 %}
+           <button class="add-button" onclick="showTaskForm()">+</button>
+          {% endif %}
+
+          {% for sousTache in sousTaches %}
+
+          {% if user[0][0] | string == sousTache[6][0] | string or session.get('role') == 1 or session.get('role') == 2 %}
+     
+              {% if sousTache[2] == "En Cours" %}
+                  <div class="task"
+                       id="task{{ sousTache[0] }}"
+                       draggable="true"
+                       ondragstart="drag(event)">
+                       <form id="task-update-form-{{ sousTache[0] }}" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
+                        <input type="hidden" id="task-id-input" name="task_id" value ="{{ sousTache[0] }}" />
+                        <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+                        <input type="hidden" id="task-status-input-{{ sousTache[0] }}" name="task_status" />
+          
+                        <input type="hidden" id="proj" name="proj" value="{{ projet[0] }}" />
+                      </form>
+                      <!-- Nom tâche -->
+                      <a href="{{ url_for('tache', proj_id=projet[0], task_id=sousTache[0]) }}">
+                          <p>{{ sousTache[3] }}</p>
+                      </a>
+                      <p>Début: {{ sousTache[4] }}</p>
+                      <p>Fin: {{ sousTache[5] }}</p>
+                      <p>Statut: Termine</p>
                       <div class="icons">👤👤👤</div>
                   </div>
               {% endif %}
@@ -388,51 +398,53 @@
 
 
         <script>
-          // Fonction pour autoriser le dépôt
-          function allowDrop(ev) {
-            ev.preventDefault(); // Permet de déposer l'élément
+        
+    
+      // Autoriser le dépôt
+      function allowDrop(event) {
+            event.preventDefault(); // Permet de déposer
           }
-    
-          // Fonction pour commencer à draguer l'élément
-          function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
-    
-            if (ev.target.classList.contains("task")) {
-              ev.dataTransfer.setData("text", ev.target.id);
+
+          // Commencer à draguer l'élément
+          function drag(event) {
+            event.dataTransfer.setData("text", event.target.id); // Stocke l'ID de l'élément
+          }
+
+          // Gérer le dépôt de l'élément
+          function drop(event) {
+            event.preventDefault();
+
+            // Récupérer l'élément déplacé
+            const draggedElementId = event.dataTransfer.getData("text"); // Récupère l'ID stocké dans `dragstart`
+            const draggedElement = document.getElementById(draggedElementId); // Récupère l'élément par son ID
+
+            // Vérifier que la cible est une colonne
+            if (event.target.classList.contains("column")) {
+              event.target.appendChild(draggedElement); // Déplacer la tâche dans la colonne
+
+              // Récupérer la colonne cible (statut)
+              const column = event.target.getAttribute("data-column");
+
+              // Extraire l'ID numérique de la tâche
+              const taskNumericId = draggedElementId.replace("task", "");
+
+              // Identifier et mettre à jour le formulaire correspondant
+              const formId = `task-update-form-${taskNumericId}`;  // Correctement formater l'ID
+              const statusInputId = `task-status-input-${taskNumericId}`
+              const form = document.getElementById(formId);  // Utilisez formId
+              const statusInput = document.getElementById(statusInputId); // Utilisez statusInputId
+
+              // Vérification pour voir si le formulaire et le champ de statut existent
+              if (form && statusInput) {
+                statusInput.value = column; // Mettre à jour avec le nouveau statut
+
+                // Soumettre le formulaire
+                form.submit();
+              } else {
+                console.error(`Formulaire ou champ manquant pour la tâche ID ${taskNumericId}`);
+              }
             }
           }
-    
-          // Function to handle the drop event
-function drop(ev) {
-  ev.preventDefault(); // Prevent the default action
-
-  // Get the ID of the dragged element
-  var data = ev.dataTransfer.getData("text");
-  var draggedElement = document.getElementById(data); // Get the dragged element
-
-  // Check if the target is a valid drop zone (e.g., a column)
-  if (ev.target.classList.contains("column")) {
-    ev.target.appendChild(draggedElement); // Add the element to the drop zone
-  }
-
-  // Get the column identifier (status)
-  const column = ev.target.getAttribute("data-column");
-
-  // Extract the sousTache ID from the dragged element's ID
-  const sousTacheId = draggedElement.id.replace('task', ''); // Remove 'task' to get the ID
-  
-  // Log or use the sousTacheId as needed
-  console.log('Dropped sousTache ID:', sousTacheId);
-
-  // Set the value for the hidden input field in the form
-  document.getElementById("task-status-input").value = column;
-  document.getElementById("task-id-input").value = sousTacheId; // Set the sousTache ID
-  document.getElementById("proj").value = "{{ projet[0] }}";
-
-  // Submit the form
-  document.getElementById("task-update-form").submit();
-}
-
         </script>
 
 <script>

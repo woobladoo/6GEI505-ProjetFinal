@@ -59,14 +59,7 @@
       <h4 class="complete">COMPLÉTÉ</h4>
     </div>
     
-    {% for sousTache in sousTaches %}
-        <form id="task-update-form" method="POST" action="{{ url_for('update_task', projet_id=projet[0]) }}" style="display:none;">
-          <input type="hidden" id="task-id-input" name="task_id" value="{{sousTache[0]}}" />
-          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
-          <input type="hidden" id="task-status-input" name="task_status" />
-
-          <input type="hidden" id="proj" name="proj"  />
-    {% endfor %}
+    
 
     <div class="tasks-container row">
       <div
@@ -88,6 +81,12 @@
           draggable="true"
           ondragstart="drag(event)"
         >
+        <form id="task-update-{{ tache[0] }}" method="POST" action="{{ url_for('update_tasks', projet_id=projet[0]) }}" style="display:none;">
+          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+          <input type="hidden" id="task-status-input-{{ tache[0] }}" name="task_status" />
+
+          <input type="hidden" id="proj" name="proj" value="{{ projet[0] }}" />
+        </form>
           <!-- Nom tâche -->
           <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
             <p>{{ tache[3] }}</p>
@@ -108,20 +107,27 @@
       >
         {% if session.get('role') == 1 or session.get('role') == 2 %}
         <button class="add-button" onclick="showTaskForm()">+</button>
-        {% endif %} {% for tache in taches %} {% if tache[2] == "En Cours" %}
+        {% endif %} {% for tache in taches %} {% if tache[2] == "Termine" %}
         <div
           class="task"
           id="task{{ tache[0] }}"
           draggable="true"
           ondragstart="drag(event)"
         >
+
+        <form id="task-update-{{ tache[0] }}" method="POST" action="{{ url_for('update_tasks', projet_id=projet[0]) }}" style="display:none;">
+          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+          <input type="hidden" id="task-status-input-{{ tache[0] }}" name="task_status" />
+
+          <input type="hidden" id="proj" name="proj" value="{{ projet[0] }}" />
+        </form>
           <!-- Nom tâche -->
           <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
             <p>{{ tache[3] }}</p>
           </a>
           <p>Début: {{ tache[4] }}</p>
           <p>Fin: {{ tache[5] }}</p>
-          <p>Statut: {{ tache[2] }}</p>
+          <p>Statut: En cours </p>
           <div class="icons">👤👤👤</div>
         </div>
         {% endif %} {% endfor %}
@@ -135,62 +141,78 @@
       >
         {% if session.get('role') == 1 or session.get('role') == 2 %}
         <button class="add-button" onclick="showTaskForm()">+</button>
-        {% endif %} {% for tache in taches %} {% if tache[2] == "Termine" %}
+        {% endif %} {% for tache in taches %} {% if tache[2] == "En Cours" %}
         <div
           class="task"
           id="task{{ tache[0] }}"
           draggable="true"
           ondragstart="drag(event)"
         >
+        <form id="task-update-{{ tache[0] }}" method="POST" action="{{ url_for('update_tasks', projet_id=projet[0]) }}" style="display:none;">
+          <input type="hidden" id="tache_id" name="tache_id" value="{{tache[0]}}"/>
+          <input type="hidden" id="task-status-input-{{ tache[0] }}" name="task_status" />
+
+          <input type="hidden" id="proj" name="proj" value="{{ projet[0] }}" />
+        </form>
           <!-- Nom tâche -->
           <a href="{{ url_for('tache', proj_id=projet[0], task_id=tache[0]) }}">
             <p>{{ tache[3] }}</p>
           </a>
           <p>Début: {{ tache[4] }}</p>
           <p>Fin: {{ tache[5] }}</p>
-          <p>Statut: {{ tache[2] }}</p>
+          <p>Statut: Termine</p>
           <div class="icons">👤👤👤</div>
         </div>
         {% endif %} {% endfor %}
       </div>
     </div>
 
-    <script>
-      // Fonction pour autoriser le dépôt
-      function allowDrop(ev) {
-        ev.preventDefault(); // Permet de déposer l'élément
-      }
-
-      // Fonction pour commencer à draguer l'élément
-      function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id); // Stocke l'id de l'élément à déplacer
-
-        if (ev.target.classList.contains("task")) {
-          ev.dataTransfer.setData("text", ev.target.id);
-        }
-      }
-
-      // Fonction pour gérer le dépôt de l'élément
-      function drop(ev) {
-        ev.preventDefault(); // Empêche l'action par défaut
-        var data = ev.dataTransfer.getData("text");
-        var draggedElement = document.getElementById(data); // Récupère l'élément dragué
-        ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
-
-        // Vérifiez que la cible est une zone valide (par exemple, une colonne)
-        if (ev.target.classList.contains("column")) {
-          ev.target.appendChild(draggedElement); // Ajoute l'élément dans la zone de dépôt
-        }
-            // Préparer les données à envoyer
-            const column = ev.target.getAttribute("data-column"); // Identifiant de la colonne (statut)
-                        
-            // Mettre à jour la position avec le formulaire invisible
-            document.getElementById("task-status-input").value = column;
-            document.getElementById("proj").value = "{{ projet[0] }}";
-
-            document.getElementById("task-update-form").submit();
-
-      }
+    <script> 
+        // Autoriser le dépôt
+        function allowDrop(event) {
+              event.preventDefault(); // Permet de déposer
+            }
+  
+            // Commencer à draguer l'élément
+            function drag(event) {
+              event.dataTransfer.setData("text", event.target.id); // Stocke l'ID de l'élément
+            }
+  
+            // Gérer le dépôt de l'élément
+            function drop(event) {
+              event.preventDefault();
+  
+              // Récupérer l'élément déplacé
+              const draggedElementId = event.dataTransfer.getData("text"); // Récupère l'ID stocké dans `dragstart`
+              const draggedElement = document.getElementById(draggedElementId); // Récupère l'élément par son ID
+  
+              // Vérifier que la cible est une colonne
+              if (event.target.classList.contains("column")) {
+                event.target.appendChild(draggedElement); // Déplacer la tâche dans la colonne
+  
+                // Récupérer la colonne cible (statut)
+                const column = event.target.getAttribute("data-column");
+  
+                // Extraire l'ID numérique de la tâche
+                const taskNumericId = draggedElementId.replace("task", "");
+  
+                // Identifier et mettre à jour le formulaire correspondant
+                const formId = `task-update-${taskNumericId}`;  // Correctement formater l'ID
+                const statusInputId = `task-status-input-${taskNumericId}`
+                const form = document.getElementById(formId);  // Utilisez formId
+                const statusInput = document.getElementById(statusInputId); // Utilisez statusInputId
+  
+                // Vérification pour voir si le formulaire et le champ de statut existent
+                if (form && statusInput) {
+                  statusInput.value = column; // Mettre à jour avec le nouveau statut
+  
+                  // Soumettre le formulaire
+                  form.submit();
+                } else {
+                  console.error(`Formulaire ou champ manquant pour la tâche ID ${taskNumericId}`);
+                }
+              }
+            }    
     </script>
 
     <script>
